@@ -15,7 +15,7 @@ import com.takeo.service.impl.PostServiceImpl;
 import com.takeo.service.impl.UserServiceImpl;
 
 @RestController
-@RequestMapping("/blog/post/")
+@RequestMapping("/blog")
 public class PostController {
 
 	@Autowired
@@ -41,4 +41,6 @@ public class PostController {
 
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found, post not created");
 	}
+	
+	public ResponseEntity<String> 
 }
