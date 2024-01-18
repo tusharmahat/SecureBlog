@@ -20,19 +20,21 @@ import com.takeo.entity.User;
 import com.takeo.service.impl.UserServiceImpl;
 
 @RestController
-@RequestMapping("/blog/user/")
+@RequestMapping("/blog")
 public class UserController {
 
 	@Autowired
 	private UserServiceImpl userServiceImpl;
 
-	@PostMapping("/register")
+//	http://localhost:8080/blog/users
+	@PostMapping("/users")
 	public ResponseEntity<String> register(@RequestBody User user) {
 		userServiceImpl.create(user);
 		return ResponseEntity.status(HttpStatus.CREATED).body("User successfully created");
 	}
 
-	@GetMapping("/read")
+//	http://localhost:8080/blog/users
+	@GetMapping("/users")
 	public ResponseEntity<List<UserDto>> getAll() {
 		List<User> users = userServiceImpl.read();
 		List<UserDto> usersDto = new ArrayList<>();
@@ -46,14 +48,15 @@ public class UserController {
 		return ResponseEntity.ok().body(usersDto);
 	}
 
-	@GetMapping("/read/{id}")
+//	http://localhost:8080/blog/users/1
+	@GetMapping("/users/{id}")
 	public User get(@PathVariable("id") Long uid) {
 		User user = userServiceImpl.read(uid);
 		return user;
 	}
 
-//	http://localhost:8080/blog/user/posts/read/1
-	@GetMapping("/posts/read/{id}")
+//	http://localhost:8080/blog/users/posts/1
+	@GetMapping("/users/posts/{id}")
 	public ResponseEntity<List<Post>> getUserPosts(@PathVariable("id") Long userId) {
 		User user = userServiceImpl.read(userId);
 
