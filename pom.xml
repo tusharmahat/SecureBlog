@@ -10,7 +10,7 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.takeo</groupId>
-	<artifactId>SB_REST_BlogMangement</artifactId>
+	<artifactId>SB_REST_BlogManagement</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>SB_REST_BlogMangement</name>
 	<description>Demo project for Spring Boot</description>

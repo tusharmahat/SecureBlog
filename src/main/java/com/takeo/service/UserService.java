@@ -11,5 +11,9 @@ public interface UserService {
 	List<User> read();
 
 	User read(Long uid);
+	
+	User update(User user);
+	
+	boolean delete(Long uid);
 
 }
