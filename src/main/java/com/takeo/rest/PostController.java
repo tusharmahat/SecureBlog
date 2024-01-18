@@ -23,22 +23,22 @@ public class PostController {
 
 	@Autowired
 	private PostServiceImpl postServiceImpl;
-	
-//	http://localhost:8080/blog/post/create
-	@PostMapping("/create")
+
+//	http://localhost:8080/blog/posts
+	@PostMapping("/posts")
 	public ResponseEntity<String> createPost(@RequestBody PostDto postDto) {
-		User existingUser=userServiceImpl.read(postDto.getUid());
-		if(existingUser!=null) {
-			Post post =new Post();
+		User existingUser = userServiceImpl.read(postDto.getUid());
+		if (existingUser != null) {
+			Post post = new Post();
 			post.setTitle(postDto.getTitle());
 			post.setPost(postDto.getPost());
 			post.setCategory(postDto.getCategory());
 			post.setUser(existingUser);
-			
+
 			postServiceImpl.create(post);
 			return ResponseEntity.ok().body("Post created successfully");
 		}
-		
-		 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found, post not created");
+
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found, post not created");
 	}
 }
