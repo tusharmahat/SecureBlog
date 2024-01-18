@@ -39,6 +39,6 @@ public class PostController {
 			return ResponseEntity.ok().body("Post created successfully");
 		}
 		
-		 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+		 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found, post not created");
 	}
 }
