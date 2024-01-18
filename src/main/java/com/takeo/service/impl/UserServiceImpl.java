@@ -27,8 +27,25 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User read(Long uid) {
-		System.out.println("UID "+uid);
+		System.out.println("UID " + uid);
 		return daoImpl.findById(uid).get();
+	}
+
+	@Override
+	public User update(User user) {
+		User saveUser = create(user);
+		return saveUser;
+	}
+
+	@Override
+	public boolean delete(Long uid) {
+		User existingUser = read(uid);
+
+		if (existingUser != null) {
+			daoImpl.deleteById(uid);
+			return true;
+		}
+		return false;
 	}
 
 }
