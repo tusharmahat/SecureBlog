@@ -3,6 +3,7 @@ package com.takeo.rest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,6 +42,4 @@ public class PostController {
 
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found, post not created");
 	}
-	
-	public ResponseEntity<String> 
 }

@@ -1,6 +1,7 @@
 package com.takeo.entity;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -12,7 +13,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.Data;
@@ -28,6 +32,41 @@ public class User {
 
 	@Column(name = "uname")
 	private String uName;
+	
+	@Column(name = "email")
+	private String email;
+	
+	@Column(name = "mobile")
+	private String mobile;
+	
+	@Column(name = "password")
+	@JsonIgnore
+	private String password;
+
+	@JsonIgnore
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(updatable = false)
+	private Date creationDate = new Date();
+
+	@JsonIgnore
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(insertable = false)
+	private Date updateDate = new Date();
+
+	@JsonIgnore
+	private int age;
+
+	@JsonIgnore
+	private String gender;
+	
+	@JsonIgnore
+	private String image;
+	
+	@JsonIgnore
+	private String otp;
+	
+	@JsonIgnore
+	private long roleId;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JsonManagedReference

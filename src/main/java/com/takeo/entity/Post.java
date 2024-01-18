@@ -31,10 +31,9 @@ public class Post {
 	@Column(name="post")
 	private String post;
 	
-	
 	@ManyToOne
 	@JoinColumn(name="uid")
-	  @JsonBackReference
+	@JsonBackReference
 	private  User user;
 
 }

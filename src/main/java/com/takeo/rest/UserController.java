@@ -20,6 +20,7 @@ import com.takeo.dto.UserDto;
 import com.takeo.entity.Post;
 import com.takeo.entity.User;
 import com.takeo.service.impl.UserServiceImpl;
+import com.takeo.utils.OtpGenerator;
 
 @RestController
 @RequestMapping("/blog")
@@ -31,7 +32,7 @@ public class UserController {
 //	http://localhost:8080/blog/users
 	@PostMapping("/users")
 	public ResponseEntity<String> register(@RequestBody User user) {
-		userServiceImpl.create(user);
+		userServiceImpl.register(user);
 		return ResponseEntity.status(HttpStatus.CREATED).body("User successfully created");
 	}
 
@@ -58,7 +59,7 @@ public class UserController {
 	}
 
 //	http://localhost:8080/blog/users/posts/1
-	@GetMapping("/users/posts/{id}")
+	@GetMapping("/users/{id}/posts")
 	public ResponseEntity<List<Post>> getUserPosts(@PathVariable("id") Long uid) {
 		User user = userServiceImpl.read(uid);
 
@@ -84,13 +85,14 @@ public class UserController {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
 	}
 
-	@PutMapping("/users")
-	public ResponseEntity<String> putUser(@RequestBody User user) {
-		User existingUser = userServiceImpl.read(user.getUId());
-		String message = "Not updated";
+	@PutMapping("/users/{id}")
+	public ResponseEntity<String> putUser(@PathVariable("id") Long uid,@RequestBody UserDto user) {
+		User existingUser = userServiceImpl.read(uid);
+		String message = "User Datails not updated";
 		if (existingUser !=null) {
-			 message = "Updated";
-			existingUser.setUName(user.getUName());
+			message = "User Datails updated";
+			user.setUId(existingUser.getUId());
+			BeanUtils.copyProperties(user, existingUser, "uid");
 			userServiceImpl.update(existingUser);
 			return ResponseEntity.ok().body(message);
 		}
