@@ -15,6 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.takeo.dto.ResetPasswordDto;
 import com.takeo.entity.User;
+import com.takeo.exceptions.DuplicateItemException;
+import com.takeo.exceptions.ResourceNotFoundException;
 import com.takeo.repo.UserRepo;
 import com.takeo.service.UserService;
 import com.takeo.utils.EmailService;
@@ -25,7 +27,7 @@ import com.takeo.utils.PasswordGenerator;
 
 @Service
 public class UserServiceImpl implements UserService {
-	
+
 //	private final String DB_PATH ="/Users/tusharmahat/db/";
 	private final String DB_PATH ="C:\\Users\\himal\\OneDrive\\Desktop\\db\\";
 	@Autowired
@@ -33,7 +35,7 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private EmailService emailService;
-	
+
 	@Autowired
 	private ImageFile imageFile;
 
@@ -41,18 +43,28 @@ public class UserServiceImpl implements UserService {
 	private ImageNameGenerator fileNameGenerator;
 
 	@Override
-	public User register(User user) {
-		// create a otp
-		String otp = OtpGenerator.generate();
+	public String register(User user) {
+		Optional<User> existingUser = daoImpl.findByEmail(user.getEmail());
+		String message = "Registration failed";
+		if (existingUser.isEmpty()) {
+			// create a otp
+			String otp = OtpGenerator.generate();
 
-		// send otp
-		emailService.sendMail(user.getEmail(), "OTP", "Your OTP is " + otp);
-		
-		// save the otp for the user
-		user.setOtp(otp);
-		
-		// save the user
-		return daoImpl.save(user);
+			// send otp
+			emailService.sendMail(user.getEmail(), "OTP", "Your OTP is " + otp);
+
+			// save the otp for the user
+			user.setOtp(otp);
+			message = "Registration Success";
+			// save the user
+			User saveUser = daoImpl.save(user);
+			if (saveUser != null) {
+				message = "OTP sent to respected email address";
+			}
+		} else {
+			throw new DuplicateItemException("User with same email already registered.");
+		}
+		return message;
 	}
 
 	@Override
@@ -79,24 +91,25 @@ public class UserServiceImpl implements UserService {
 		if (existingUser != null) {
 			daoImpl.deleteById(uid);
 			return true;
+		}else {
+			throw new ResourceNotFoundException("User with uid: "+uid+"not found ");
 		}
-		return false;
 	}
 
 	@Override
 	public String verifyOtp(String otp) {
-		User existingUser=daoImpl.findByOtp(otp).get();
-		String message="OTP not verified";
-		if(existingUser!=null) {
-			if(otp.equals(existingUser.getOtp())) {
-				String randomPassword =PasswordGenerator.generateRandomPassword();
+		User existingUser = daoImpl.findByOtp(otp).get();
+		String message = "OTP not verified";
+		if (existingUser != null) {
+			if (otp.equals(existingUser.getOtp())) {
+				String randomPassword = PasswordGenerator.generateRandomPassword();
 				existingUser.setPassword(randomPassword);
 				existingUser.setOtp("");
 				existingUser.setRoleId(2l);
 				User saveUser = daoImpl.save(existingUser);
 				if (saveUser != null) {
-					emailService.sendMail(existingUser.getEmail(), "Password", "Your password is "+randomPassword);
-					message="OTP verified, password sent to email";
+					emailService.sendMail(existingUser.getEmail(), "Password", "Your password is " + randomPassword);
+					message = "OTP verified, password sent to email";
 				}
 			}
 		}
@@ -105,16 +118,16 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public String userLogin(String email, String password) {
-		Optional<User> existingUser=daoImpl.findByEmail(email);
-		if(existingUser!=null) {
-			User user=existingUser.get();
-			if(user.getPassword().equals(password)) {
-				return "Logged in";  
-			}else {
-				return "Invalid password"; //throw exception
+		Optional<User> existingUser = daoImpl.findByEmail(email);
+		if (existingUser != null) {
+			User user = existingUser.get();
+			if (user.getPassword().equals(password)) {
+				return "Logged in";
+			} else {
+				return "Invalid password"; // throw exception
 			}
 		}
-		return "Invalid email"; //throw exception
+		return "Invalid email"; // throw exception
 	}
 
 	@Override
@@ -127,8 +140,8 @@ public class UserServiceImpl implements UserService {
 			existingUser.setPassword(randomPassword);
 			User saveUser = daoImpl.save(existingUser);
 			if (saveUser != null) {
-				emailService.sendMail(existingUser.getEmail(), "Password", "Your password is "+randomPassword);
-				message="New password sent to respective email";
+				emailService.sendMail(existingUser.getEmail(), "Password", "Your password is " + randomPassword);
+				message = "New password sent to respective email";
 			}
 		} else {
 			return ("invalid email address");
@@ -139,13 +152,13 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public String updateProfilePicture(MultipartFile file, String email) {
 		System.out.println(email);
-		Optional<User> existingUser=daoImpl.findByEmail(email);
-		if(!existingUser.isEmpty()) {
-			User user=existingUser.get();
+		Optional<User> existingUser = daoImpl.findByEmail(email);
+		if (!existingUser.isEmpty()) {
+			User user = existingUser.get();
 			String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
-			String fileName=timestamp+ fileNameGenerator.getFileExtensionName(file.getOriginalFilename());
+			String fileName = timestamp + fileNameGenerator.getFileExtensionName(file.getOriginalFilename());
 			String filePath = DB_PATH + fileName;
-			
+
 			if (imageFile.isImageFile(file)) {
 				// Create the folder if it doesn't exist
 				File folder = new File(filePath);
@@ -165,7 +178,7 @@ public class UserServiceImpl implements UserService {
 			} else {
 				return ("Only image files are allowed.");
 			}
-			
+
 		}
 		return null;
 	}
@@ -192,21 +205,21 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public String changePassword(ResetPasswordDto resetPassDto) {
-		Optional<User> user=daoImpl.findByEmail(resetPassDto.getEmail());
-		if(user!=null) {
-			if(resetPassDto.getPassword().equals(resetPassDto.getConfirmPassword())) {
-				User userObject=user.get();
+		Optional<User> user = daoImpl.findByEmail(resetPassDto.getEmail());
+		if (user != null) {
+			if (resetPassDto.getPassword().equals(resetPassDto.getConfirmPassword())) {
+				User userObject = user.get();
 				userObject.setPassword(resetPassDto.getConfirmPassword());
-				
-				User saveUser=update(userObject);
-				if(saveUser!=null) {
+
+				User saveUser = update(userObject);
+				if (saveUser != null) {
 					return "Password updated";
 				}
-			}else {
+			} else {
 				return "password mismatch";
 			}
 		}
-		
+
 		return "Invalid email";
 	}
 
