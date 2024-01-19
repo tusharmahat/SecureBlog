@@ -11,7 +11,7 @@ public class PostDto {
 		
 		private String category;
 		
-		private String post;
+		private String content;
 
 		private  Long uid;
 

@@ -28,8 +28,8 @@ public class Post {
 	@Column(name="category")
 	private String category;
 	
-	@Column(name="post")
-	private String post;
+	@Column(name="content")
+	private String content;
 	
 	@ManyToOne
 	@JoinColumn(name="uid")
