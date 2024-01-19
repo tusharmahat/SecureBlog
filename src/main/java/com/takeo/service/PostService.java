@@ -2,6 +2,8 @@ package com.takeo.service;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.takeo.entity.Post;
 
 public interface PostService {
@@ -15,6 +17,11 @@ public interface PostService {
 	Post update(Post post, Long uid, Long pid);
 	
 	boolean delete(Long pid, Long uid);
+	
+	public String updatePostPicture(MultipartFile file, Long pid);
+
+	
+	public byte[] viewPostPicture(Long pid);
 	
 
 }

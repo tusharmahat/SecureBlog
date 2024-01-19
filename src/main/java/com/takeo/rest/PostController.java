@@ -48,7 +48,7 @@ public class PostController {
 	}
 	
 	//get all posts of a user
-	@GetMapping("/posts/{uid}")
+	@GetMapping("/posts/users/{uid}")
 	public ResponseEntity<?> getAll(@PathVariable long uid)
 	{
 	List<Post> posts=postServiceImpl.read(uid);
@@ -62,7 +62,7 @@ public class PostController {
 	}
 	
 	//Get posts from post id
-	@GetMapping("/posts/{pid}")
+	@GetMapping("/posts/{id}")
 	public Post get (@PathVariable("id") Long pid)
 	{
 		Post post = postServiceImpl.readPost(pid);

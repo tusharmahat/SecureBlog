@@ -10,6 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
 
@@ -27,6 +28,9 @@ public class Post {
 	
 	@Column(name="category")
 	private String category;
+	
+	@JsonIgnore
+	private String image;
 	
 	@Column(name="content")
 	private String content;
