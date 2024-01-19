@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,7 +36,7 @@ public class PostController {
 		if (existingUser != null) {
 			Post post = new Post();
 			post.setTitle(postDto.getTitle());
-			post.setPost(postDto.getPost());
+			post.setContent(postDto.getContent());
 			post.setCategory(postDto.getCategory());
 			post.setUser(existingUser);
 
@@ -45,16 +46,39 @@ public class PostController {
 
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found, post not created");
 	}
+	
+	//get all posts of a user
 	@GetMapping("/posts/{uid}")
-	public ResponseEntity<List<Post>> getAll(@PathVariable long uid)
+	public ResponseEntity<?> getAll(@PathVariable long uid)
 	{
-	List<Post> posts=postServiceImpl.read();
+	List<Post> posts=postServiceImpl.read(uid);
 	if(posts!=null)
 	{
 		return ResponseEntity.ok(posts);
 	}
-	else
+
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No posts avialable for this User");
 
+	}
+	
+	//Get posts from post id
+	@GetMapping("/posts/{pid}")
+	public Post get (@PathVariable("id") Long pid)
+	{
+		Post post = postServiceImpl.readPost(pid);
+		
+		return post;
+	}
+	
+	@PutMapping("/posts/{id}")
+	public ResponseEntity<String> deletePost(@PathVariable ("id") long pid ){
+		boolean result =postServiceImpl.delete(pid, pid);
+		String message ="Not deleted";
+		
+		if(result) {
+			message="Deleted";
+			return ResponseEntity.ok().body(message);		
+			}
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
 	}
 }
