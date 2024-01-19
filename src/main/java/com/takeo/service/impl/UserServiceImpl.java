@@ -28,7 +28,8 @@ import com.takeo.utils.PasswordGenerator;
 @Service
 public class UserServiceImpl implements UserService {
 
-	private final String DB_PATH = "/Users/tusharmahat/db/";
+//	private final String DB_PATH ="/Users/tusharmahat/db/";
+	private final String DB_PATH ="C:\\Users\\himal\\OneDrive\\Desktop\\db\\";
 	@Autowired
 	private UserRepo daoImpl;
 
