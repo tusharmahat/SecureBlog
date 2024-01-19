@@ -9,7 +9,7 @@ import com.takeo.entity.User;
 
 public interface UserService {
 
-	User register(User user);
+	String register(User user);
 
 	List<User> read();
 
