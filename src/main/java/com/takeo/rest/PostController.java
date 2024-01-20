@@ -1,6 +1,8 @@
 package com.takeo.rest;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.takeo.dto.PostDto;
 import com.takeo.entity.Post;
@@ -27,12 +31,16 @@ public class PostController {
 
 //	http://localhost:8080/blog/posts
 	@PostMapping("/posts")
-	public ResponseEntity<String> createPost(@RequestBody PostDto postDto) {
+	public ResponseEntity<Map<String, String>> createPost(@RequestBody PostDto postDto) {
+		String message ="Post Created";
 		String postSave = postServiceImpl.create(postDto, postDto.getUid());
-		return ResponseEntity.ok().body(postSave);
+		Map<String,String> response = new HashMap<>();
+		response.put(message, postSave);
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 	
 	//get all posts of a user
+//	http://localhost:8080/blog/posts/users/{uid}
 	@GetMapping("/posts/users/{uid}")
 	public ResponseEntity<?> getAll(@PathVariable long uid)
 	{
@@ -46,7 +54,7 @@ public class PostController {
 
 	}
 	
-	//Get posts from post id
+//	http://localhost:8080/blog/posts/{id}
 	@GetMapping("/posts/{id}")
 	public Post get (@PathVariable("id") Long pid)
 	{
@@ -55,23 +63,35 @@ public class PostController {
 		return post;
 	}
 
-	
+//	http://localhost:8080/blog/posts/{uid}/update/{pid}	
 	@PutMapping("/posts/{uid}/update/{pid}")
-	public ResponseEntity<String> updatepost(@PathVariable ("pid") long pid,@PathVariable("uid") long uid, Post post)
+	public ResponseEntity<String> updatepost(@PathVariable ("pid") long pid,@PathVariable("uid") long uid, @RequestBody PostDto post)
 	{
 		Post existingPost= postServiceImpl.update(post, uid, pid);
 		String message ="Post not updated";
 		
 		if(existingPost!=null) {
 			message="Post details updated";
-			post.setPid(existingPost.getPid());
-			BeanUtils.copyProperties(post, existingPost, "pid");
-			postServiceImpl.update(existingPost, uid, pid);
+			
 			return ResponseEntity.ok().body(message);
 		}
 		
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
 	}
+//	http://localhost:8080/blog/posts/updatepostpic	
+	@PostMapping("/posts/updatepostpic")
+	public ResponseEntity<Map<String,  String>> updatePostPic(@RequestParam("file")MultipartFile file,
+			@RequestParam("pid") Long pid){
+		String updatePicture =postServiceImpl.updatePostPicture(file, pid);
+		String message ="Message";
+		
+		Map<String, String> response= new HashMap<>();
+		
+		response.put(message, updatePicture);
+		
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+	
 	
 	@PutMapping("/posts/{id}")
 	public ResponseEntity<String> deletePost(@PathVariable("id") long pid) {

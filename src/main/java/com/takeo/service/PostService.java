@@ -16,7 +16,7 @@ public interface PostService {
 	public Post readPost(Long pid);
 	Post readPost(Long uid, Long pid);
 	
-	Post update(Post post, Long uid, Long pid);
+	Post update(PostDto post, Long uid, Long pid);
 	
 	boolean delete(Long pid, Long uid);
 	

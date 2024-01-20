@@ -2,6 +2,8 @@ package com.takeo.service.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -66,36 +68,43 @@ public class PostServiceImpl implements PostService {
 
 	@Override
 	public Post readPost(Long pid) {
-		Post post = postDaoImpl.findById(pid).get();
-		return post;
+		Optional<Post> post = postDaoImpl.findById(pid);
+		if (post.isPresent()) {
+			Post returnPost= post.get();
+			return returnPost;
+		}
+		throw new ResourceNotFoundException("Post with "+pid+" not found");
 	}
 
 	@Override
 	public Post readPost(Long uid, Long pid) {
 		// TODO Auto-generated method stub
 		Post p = readPost(pid);
-		if (p != null && p.getUser().getUId() == uid) {
+		if (p.getUser().getUId()==uid) {
+			
 			return p;
 		}
-		return null;
+		throw new ResourceNotFoundException("User: "+uid+"Post pid: "+pid+" not found");
 	}
 
 	@Override
-	public Post update(Post post, Long uid, Long pid) {
+	public Post update(PostDto post, Long uid, Long pid) {
 		// TODO Auto-generated method stub
 
-		Post p = readPost(pid);
-		if (p != null && p.getUser().getUId() == uid) {
-			return postDaoImpl.save(post);
+		Post existingPost = readPost(pid);
+		if (existingPost.getUser().getUId() == uid) {
+			post.setPid(existingPost.getPid());
+			BeanUtils.copyProperties(post, existingPost);
+			return postDaoImpl.save(existingPost);
 		}
-		return null;
+		throw new ResourceNotFoundException("Update failed");
 	}
 
 	@Override
 	public boolean delete(Long pid, Long uid) {
 		// TODO Auto-generated method stub
 		Post p = readPost(pid);
-		if (p != null && p.getUser().getUId() == uid) {
+		if (p.getUser().getUId() == uid) {
 			postDaoImpl.deleteById(pid);
 			return true;
 		}
@@ -106,9 +115,22 @@ public class PostServiceImpl implements PostService {
 	@Override
 	public byte[] viewPostPicture(Long pid) {
 		// TODO Auto-generated method stub
+		Optional<Post> post=postDaoImpl.findById(pid);
+		if(post.isPresent())
+		{
+			try {
+				return Files.readAllBytes(Paths.get(DB_PATH));
+			}catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		else
+		{
+			throw new ResourceNotFoundException("Post picture not found for the post with post id: "+pid);
+		}
 		
 		
-		return null;
+		throw new ResourceNotFoundException("User  not found with user id: "+pid);
 	}
 
 	@Override
@@ -134,7 +156,7 @@ public class PostServiceImpl implements PostService {
 					e.printStackTrace();
 				}
 				post.setImage(filePath);
-				Post updatePhoto = create(post);
+				Post updatePhoto = postDaoImpl.save(post);
 				if (updatePhoto != null) {
 					return "successfull";
 				}
