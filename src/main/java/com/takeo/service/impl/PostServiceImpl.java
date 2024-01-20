@@ -99,7 +99,8 @@ public class PostServiceImpl implements PostService {
 			postDaoImpl.deleteById(pid);
 			return true;
 		}
-		return false;
+		else throw new ResourceNotFoundException("Post with "+pid+"not found");
+	
 	}
 
 	@Override
