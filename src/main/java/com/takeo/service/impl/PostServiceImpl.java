@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,17 +26,20 @@ import com.takeo.utils.ImageNameGenerator;
 @Service
 public class PostServiceImpl implements PostService {
 //	private final String DB_PATH ="/Users/tusharmahat/db/";
-	private final String DB_PATH ="C:\\Users\\himal\\OneDrive\\Desktop\\db\\";
-	
+	private final String DB_PATH = "C:\\Users\\himal\\OneDrive\\Desktop\\db\\";
+
+	@Autowired
+	private ModelMapper modelMapper;
+
 	@Autowired
 	private ImageFile imageFile;
-	
+
 	@Autowired
 	private PostRepo postDaoImpl;
 
 	@Autowired
 	private UserRepo userDaoImpl;
-	
+
 	@Autowired
 	private ImageNameGenerator fileNameGenerator;
 
@@ -66,27 +70,35 @@ public class PostServiceImpl implements PostService {
 
 	@Override
 	public Post readPost(Long pid) {
-		Post post = postDaoImpl.findById(pid).get();
-		return post;
+		Optional<Post> post = postDaoImpl.findById(pid);
+
+		if (post.isPresent()) {
+			Post returnPost = post.get();
+			return returnPost;
+		}
+		throw new ResourceNotFoundException("ffds");
 	}
 
 	@Override
 	public Post readPost(Long uid, Long pid) {
 		// TODO Auto-generated method stub
 		Post p = readPost(pid);
-		if (p != null && p.getUser().getUId() == uid) {
+		if (p.getUser().getUId() == uid) {
 			return p;
 		}
-		return null;
+		throw new ResourceNotFoundException("ffds");
 	}
 
 	@Override
-	public Post update(Post post, Long uid, Long pid) {
+	public Post update(PostDto post, Long uid, Long pid) {
 		// TODO Auto-generated method stub
 
-		Post p = readPost(pid);
-		if (p != null && p.getUser().getUId() == uid) {
-			return postDaoImpl.save(post);
+		Post existingPost = readPost(pid);
+		if (existingPost.getUser().getUId() == uid) {
+			post.setPid(existingPost.getPid());
+			modelMapper.map(post, existingPost);
+
+			return postDaoImpl.save(existingPost);
 		}
 		return null;
 	}
@@ -95,19 +107,18 @@ public class PostServiceImpl implements PostService {
 	public boolean delete(Long pid, Long uid) {
 		// TODO Auto-generated method stub
 		Post p = readPost(pid);
-		if (p != null && p.getUser().getUId() == uid) {
+		if (p.getUser().getUId() == uid) {
 			postDaoImpl.deleteById(pid);
 			return true;
-		}
-		else throw new ResourceNotFoundException("Post with "+pid+"not found");
-	
+		} else
+			throw new ResourceNotFoundException("Post with " + pid + "not found");
+
 	}
 
 	@Override
 	public byte[] viewPostPicture(Long pid) {
 		// TODO Auto-generated method stub
-		
-		
+
 		return null;
 	}
 
@@ -116,15 +127,15 @@ public class PostServiceImpl implements PostService {
 		// TODO Auto-generated method stub
 		System.out.println(pid);
 		Optional<Post> existingPost = postDaoImpl.findById(pid);
-		if(existingPost.isEmpty()) {
+		if (existingPost.isEmpty()) {
 			Post post = existingPost.get();
-			String timeStamp =LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmSSS"));
-			String fileName = timeStamp+ fileNameGenerator.getFileExtensionName(file.getOriginalFilename());
-		    String filePath =DB_PATH+fileName;
-		    
-		    if(imageFile.isImageFile(file)) {
-		    	//Create the folder if it doesnt exist
-		    	File folder = new File(filePath);
+			String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmSSS"));
+			String fileName = timeStamp + fileNameGenerator.getFileExtensionName(file.getOriginalFilename());
+			String filePath = DB_PATH + fileName;
+
+			if (imageFile.isImageFile(file)) {
+				// Create the folder if it doesnt exist
+				File folder = new File(filePath);
 				if (!folder.exists()) {
 					folder.mkdirs();
 				}
@@ -134,14 +145,14 @@ public class PostServiceImpl implements PostService {
 					e.printStackTrace();
 				}
 				post.setImage(filePath);
-				Post updatePhoto = create(post);
+				Post updatePhoto = postDaoImpl.save(post);
 				if (updatePhoto != null) {
 					return "successfull";
 				}
 			} else {
 				return ("Only image files are allowed.");
 			}
-			
+
 		}
 		return null;
 	}
