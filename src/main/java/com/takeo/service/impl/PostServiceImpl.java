@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.takeo.entity.Post;
 import com.takeo.entity.User;
+import com.takeo.exceptions.ResourceNotFoundException;
 import com.takeo.repo.PostRepo;
 import com.takeo.repo.UserRepo;
 import com.takeo.service.PostService;
@@ -87,8 +88,8 @@ public class PostServiceImpl implements PostService {
 			 postDaoImpl.deleteById(pid);
 			 return true;
 		}
+		else throw new ResourceNotFoundException("Post with "+pid+"notfound");
 		
-		return false;
 	}
 
 	@Override

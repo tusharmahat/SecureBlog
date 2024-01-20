@@ -2,6 +2,7 @@ package com.takeo.rest;
 
 import java.util.List;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -68,6 +69,23 @@ public class PostController {
 		Post post = postServiceImpl.readPost(pid);
 		
 		return post;
+	}
+	
+	@PutMapping("/posts/{uid}/update/{pid}")
+	public ResponseEntity<String> updatepost(@PathVariable ("pid") long pid,@PathVariable("uid") long uid, Post post)
+	{
+		Post existingPost= postServiceImpl.update(post, uid, pid);
+		String message ="Post not updated";
+		
+		if(existingPost!=null) {
+			message="Post details updated";
+			post.setPid(existingPost.getPid());
+			BeanUtils.copyProperties(post, existingPost, "pid");
+			postServiceImpl.update(existingPost, uid, pid);
+			return ResponseEntity.ok().body(message);
+		}
+		
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
 	}
 	
 	@PutMapping("/posts/{id}")
