@@ -2,11 +2,12 @@ package com.takeo.service;
 
 import java.util.List;
 
+import com.takeo.dto.PostDto;
 import com.takeo.entity.Post;
 
 public interface PostService {
 
-	Post create(Post post);
+	String create(PostDto post, Long uid);
 
 	List<Post> read(Long uid);
 	public Post readPost(Long pid);

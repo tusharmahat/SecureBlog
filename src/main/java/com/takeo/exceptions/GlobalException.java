@@ -64,5 +64,11 @@ public class GlobalException extends ResponseEntityExceptionHandler {
 				.timestamp(new Date()).build();
 		return new ResponseEntity<>(res, HttpStatus.NOT_FOUND);
 	}
+	@ExceptionHandler(InvalidFileExtensionException.class)
+	protected ResponseEntity<ApiResponse> invalidFileExtensionException(InvalidFileExtensionException e) {
+		ApiResponse res = ApiResponse.builder().message(e.getMessage()).status(HttpStatus.NOT_FOUND)
+				.timestamp(new Date()).build();
+		return new ResponseEntity<>(res, HttpStatus.NOT_FOUND);
+	}
 
 }

@@ -6,16 +6,21 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.takeo.dto.ResetPasswordDto;
+import com.takeo.dto.UserDto;
 import com.takeo.entity.User;
 import com.takeo.exceptions.DuplicateItemException;
+import com.takeo.exceptions.InvalidFileExtensionException;
+import com.takeo.exceptions.PasswordMismatchException;
 import com.takeo.exceptions.ResourceNotFoundException;
 import com.takeo.repo.UserRepo;
 import com.takeo.service.UserService;
@@ -67,72 +72,93 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<User> read() {
+	public List<UserDto> read() {
 		List<User> users = daoImpl.findAll();
-		return users;
+		List<UserDto> usersDto = new ArrayList<>();
+		for (User u : users) {
+			UserDto uDto = new UserDto();
+			BeanUtils.copyProperties(u, uDto);
+			usersDto.add(uDto);
+		}
+
+		if (users.isEmpty()) {
+			throw new ResourceNotFoundException("Users not found");
+		}
+		return usersDto;
 	}
 
 	@Override
-	public User read(Long uid) {
-		return daoImpl.findById(uid).get();
-	}
+	public UserDto update(UserDto user) {
+		Optional<User> existingUser = daoImpl.findById(user.getUId());
+		if (existingUser.isPresent()) {
+			User u = existingUser.get();
 
-	@Override
-	public User update(User user) {
-		User saveUser = daoImpl.save(user);
-		return saveUser;
+			user.setUId(u.getUId());
+			BeanUtils.copyProperties(user, u);
+			User saveUser = daoImpl.save(u);
+
+			UserDto uDto = new UserDto();
+			BeanUtils.copyProperties(saveUser, uDto);
+			return uDto;
+		}
+		throw new ResourceNotFoundException("User not found");// exception
 	}
 
 	@Override
 	public boolean delete(Long uid) {
-		User existingUser = read(uid);
+		Optional<User> existingUser = daoImpl.findById(uid);
 
-		if (existingUser != null) {
+		if (existingUser.isPresent()) {
 			daoImpl.deleteById(uid);
 			return true;
-		}else {
-			throw new ResourceNotFoundException("User with uid: "+uid+"not found ");
+		} else {
+			throw new ResourceNotFoundException("User with uid: " + uid + "not found ");
 		}
 	}
 
 	@Override
 	public String verifyOtp(String otp) {
-		User existingUser = daoImpl.findByOtp(otp).get();
-		String message = "OTP not verified";
-		if (existingUser != null) {
-			if (otp.equals(existingUser.getOtp())) {
+		Optional<User> existingUser = daoImpl.findByOtp(otp);
+		String message = "OTP did not match";
+		if (existingUser.isPresent()) {
+			User user = existingUser.get();
+			if (otp.equals(user.getOtp())) {
 				String randomPassword = PasswordGenerator.generateRandomPassword();
-				existingUser.setPassword(randomPassword);
-				existingUser.setOtp("");
-				existingUser.setRoleId(2l);
-				User saveUser = daoImpl.save(existingUser);
+				user.setPassword(randomPassword);
+				user.setOtp("");
+				user.setRoleId(2l);
+				User saveUser = daoImpl.save(user);
 				if (saveUser != null) {
-					emailService.sendMail(existingUser.getEmail(), "Password", "Your password is " + randomPassword);
+					emailService.sendMail(user.getEmail(), "Password", "Your password is " + randomPassword);
 					message = "OTP verified, password sent to email";
 				}
 			}
+			return message;
 		}
-		return message;
+		throw new ResourceNotFoundException("User not found");
 	}
 
 	@Override
 	public String userLogin(String email, String password) {
 		Optional<User> existingUser = daoImpl.findByEmail(email);
-		if (existingUser != null) {
+		if (existingUser.isPresent()) {
 			User user = existingUser.get();
-			if (user.getPassword().equals(password)) {
-				return "Logged in";
-			} else {
-				return "Invalid password"; // throw exception
+			if (user.getPassword() != null) {
+				if (user.getPassword().equals(password)) {
+					return "Logged in";
+				} else {
+					throw new PasswordMismatchException("Password did not match");
+				}
 			}
+			return "OTP not verified";
 		}
-		return "Invalid email"; // throw exception
+		throw new ResourceNotFoundException("User not found with email: " + email);
 	}
 
 	@Override
 	public String forgotPassword(String email) {
 		Optional<User> user = daoImpl.findByEmail(email);
-		String message = "failed";
+		String message = "Failed to change password";
 		if (!user.isEmpty()) {
 			User existingUser = user.get();
 			String randomPassword = PasswordGenerator.generateRandomPassword();
@@ -142,15 +168,13 @@ public class UserServiceImpl implements UserService {
 				emailService.sendMail(existingUser.getEmail(), "Password", "Your password is " + randomPassword);
 				message = "New password sent to respective email";
 			}
-		} else {
-			return ("invalid email address");
+			return message;
 		}
-		return message;
+		throw new ResourceNotFoundException("User not found with email: " + email);
 	}
 
 	@Override
 	public String updateProfilePicture(MultipartFile file, String email) {
-		System.out.println(email);
 		Optional<User> existingUser = daoImpl.findByEmail(email);
 		if (!existingUser.isEmpty()) {
 			User user = existingUser.get();
@@ -175,11 +199,10 @@ public class UserServiceImpl implements UserService {
 					return "successfull";
 				}
 			} else {
-				return ("Only image files are allowed.");
+				throw new InvalidFileExtensionException("Only image files are allowed.");
 			}
-
 		}
-		return null;
+		throw new ResourceNotFoundException("User not found with email: " + email);
 	}
 
 	@Override
@@ -194,12 +217,10 @@ public class UserServiceImpl implements UserService {
 					e.printStackTrace();
 				}
 			} else {
-//				throw new ProfilePictureNotFoundException(
-//						"Profile picture not found for the user with email: " + email);
+				throw new ResourceNotFoundException("Profile picture not found for the user with email: " + email);
 			}
 		}
-//		throw new UserNotFoundException("User not found with email: " + email);
-		return null;
+		throw new ResourceNotFoundException("User not found with email: " + email);
 	}
 
 	@Override
@@ -210,16 +231,15 @@ public class UserServiceImpl implements UserService {
 				User userObject = user.get();
 				userObject.setPassword(resetPassDto.getConfirmPassword());
 
-				User saveUser = update(userObject);
+				User saveUser = daoImpl.save(userObject);
 				if (saveUser != null) {
 					return "Password updated";
 				}
 			} else {
-				return "password mismatch";
+				throw new PasswordMismatchException("Password mismatch");
 			}
 		}
-
-		return "Invalid email";
+		throw new ResourceNotFoundException("User not found with email: " + resetPassDto.getEmail());
 	}
 
 }

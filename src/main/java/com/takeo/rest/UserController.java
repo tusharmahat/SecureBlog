@@ -1,11 +1,9 @@
 package com.takeo.rest;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.takeo.dto.LoginDto;
 import com.takeo.dto.ResetPasswordDto;
 import com.takeo.dto.UserDto;
-import com.takeo.entity.Post;
 import com.takeo.entity.User;
 import com.takeo.service.impl.UserServiceImpl;
 
@@ -37,44 +34,20 @@ public class UserController {
 
 //	http://localhost:8080/blog/users
 	@PostMapping("/users")
-	public ResponseEntity<String> register(@RequestBody User user) {
-		userServiceImpl.register(user);
-		return ResponseEntity.status(HttpStatus.CREATED).body("User successfully created");
+	public ResponseEntity<Map<String, String>> register(@RequestBody User user) {
+		String userRegistration = userServiceImpl.register(user);
+		String message = "Message";
+		Map<String, String> response = new HashMap<>();
+		response.put(message, userRegistration);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 //	http://localhost:8080/blog/users
 	@GetMapping("/users")
 	public ResponseEntity<List<UserDto>> getAll() {
-		List<User> users = userServiceImpl.read();
-		List<UserDto> usersDto = new ArrayList<>();
-		users.forEach(user -> {
-			UserDto u = new UserDto();
-			BeanUtils.copyProperties(user, u);
-			usersDto.add(u);
+		List<UserDto> users = userServiceImpl.read();
 
-		});
-
-		return ResponseEntity.ok().body(usersDto);
-	}
-
-//	http://localhost:8080/blog/users/1
-	@GetMapping("/users/{id}")
-	public User get(@PathVariable("id") Long uid) {
-		User user = userServiceImpl.read(uid);
-		return user;
-	}
-
-//	http://localhost:8080/blog/users/posts/1
-	@GetMapping("/users/{id}/posts")
-	public ResponseEntity<List<Post>> getUserPosts(@PathVariable("id") Long uid) {
-		User user = userServiceImpl.read(uid);
-
-		if (user != null) {
-			List<Post> posts = user.getPosts();
-			return ResponseEntity.ok(posts);
-		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-		}
+		return ResponseEntity.ok().body(users);
 	}
 
 //	http://localhost:8080/blog/users/1
@@ -87,75 +60,76 @@ public class UserController {
 			message = "Deleted";
 			return ResponseEntity.ok().body(message);
 		}
-
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
 	}
 
 //	http://localhost:8080/blog/users/1
-	@PutMapping("/users/{id}")
-	public ResponseEntity<String> putUser(@PathVariable("id") Long uid, @RequestBody UserDto user) {
-		User existingUser = userServiceImpl.read(uid);
-		String message = "User Datails not updated";
-		if (existingUser != null) {
-			message = "User Datails updated";
-			user.setUId(existingUser.getUId());
-			BeanUtils.copyProperties(user, existingUser, "uid");
-			userServiceImpl.update(existingUser);
-			return ResponseEntity.ok().body(message);
-		}
+	@PutMapping("/users")
+	public ResponseEntity<Map<String, Object>> putUser(@RequestBody UserDto user) {
+		UserDto userDto = userServiceImpl.update(user);
+		String message = "Message";
+		Map<String, Object> response = new HashMap<>();
+		response.put(message, userDto);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
 	}
 
 //	http://localhost:8080/blog/user/verify/{otp}
 	@PostMapping("/user/verify/{otp}")
-	public ResponseEntity<String> verifyOtp(@PathVariable("otp") String otp) {
+	public ResponseEntity<Map<String, String>> verifyOtp(@PathVariable("otp") String otp) {
 		String verifyOtp = userServiceImpl.verifyOtp(otp);
-
-		return ResponseEntity.status(HttpStatus.CREATED).body(verifyOtp);
+		String message = "Message";
+		Map<String, String> response = new HashMap<>();
+		response.put(message, verifyOtp);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 //	http://localhost:8080/blog/user/login
 	@GetMapping("/user/login")
-	public ResponseEntity<String> login(@RequestBody LoginDto loginDto) {
+	public ResponseEntity<Map<String, String>> login(@RequestBody LoginDto loginDto) {
 		String login = userServiceImpl.userLogin(loginDto.getEmail(), loginDto.getPassword());
-		return ResponseEntity.ok().body(login);
+		String message = "Message";
+		Map<String, String> response = new HashMap<>();
+		response.put(message, login);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 //	http://localhost:8080/blog/user/forgotpassword/{email}
 	@PostMapping("user/forgotpassword/{email}")
-	public ResponseEntity<Map<String, Object>> forgotPassword(@PathVariable String email) {
+	public ResponseEntity<Map<String, String>> forgotPassword(@PathVariable String email) {
 		String resetPassword = userServiceImpl.forgotPassword(email);
-		Map<String, Object> map = new HashMap<>();
-		map.put("message", resetPassword);
-		return ResponseEntity.ok().body(map);
+		String message = "Message";
+		Map<String, String> response = new HashMap<>();
+		response.put(message, resetPassword);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 //	http://localhost:8080/blog/user/changepassword
 	@PostMapping("user/changepassword")
-	public ResponseEntity<Map<String, Object>> changePassword(@RequestBody ResetPasswordDto resetPassDto) {
+	public ResponseEntity<Map<String, String>> changePassword(@RequestBody ResetPasswordDto resetPassDto) {
 		String changePassword = userServiceImpl.changePassword(resetPassDto);
-		Map<String, Object> map = new HashMap<>();
-		map.put("message", changePassword);
-		return ResponseEntity.ok().body(map);
+		String message = "Message";
+		Map<String, String> response = new HashMap<>();
+		response.put(message, changePassword);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 //	http://localhost:8080/blog/user/updateprofilepic
 	@PostMapping("user/updateprofilepic")
-	public ResponseEntity<Map<String, Object>> updateProfilePic(@RequestParam("file") MultipartFile file,
+	public ResponseEntity<Map<String, String>> updateProfilePic(@RequestParam("file") MultipartFile file,
 			@RequestParam("email") String email) {
-		String message = userServiceImpl.updateProfilePicture(file, email);
-		Map<String, Object> map = new HashMap<>();
-		map.put("message", message);
-		return ResponseEntity.ok().body(map);
+		String updatePassword = userServiceImpl.updateProfilePicture(file, email);
+		String message = "Message";
+		Map<String, String> response = new HashMap<>();
+		response.put(message, updatePassword);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
-	
+
 //	http://localhost:8080/blog/user/profilepic/{email}
 	@GetMapping("user/profilepic/{email}")
 	public ResponseEntity<byte[]> getProfilePic(@PathVariable("email") String email) {
 		byte[] profilePic = userServiceImpl.viewProfilePicture(email);
-		return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.valueOf("image/png"))
-				.body(profilePic);
+		return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.valueOf("image/png")).body(profilePic);
 	}
 
 }
