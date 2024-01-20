@@ -16,16 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.takeo.dto.PostDto;
 import com.takeo.entity.Post;
-import com.takeo.entity.User;
 import com.takeo.service.impl.PostServiceImpl;
-import com.takeo.service.impl.UserServiceImpl;
 
 @RestController
 @RequestMapping("/blog")
 public class PostController {
-
-	@Autowired
-	private UserServiceImpl userServiceImpl;
 
 	@Autowired
 	private PostServiceImpl postServiceImpl;
@@ -33,19 +28,8 @@ public class PostController {
 //	http://localhost:8080/blog/posts
 	@PostMapping("/posts")
 	public ResponseEntity<String> createPost(@RequestBody PostDto postDto) {
-		User existingUser = userServiceImpl.read(postDto.getUid());
-		if (existingUser != null) {
-			Post post = new Post();
-			post.setTitle(postDto.getTitle());
-			post.setContent(postDto.getContent());
-			post.setCategory(postDto.getCategory());
-			post.setUser(existingUser);
-
-			postServiceImpl.create(post);
-			return ResponseEntity.ok().body("Post created successfully");
-		}
-
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found, post not created");
+		String postSave = postServiceImpl.create(postDto, postDto.getUid());
+		return ResponseEntity.ok().body(postSave);
 	}
 	
 	//get all posts of a user
@@ -67,9 +51,10 @@ public class PostController {
 	public Post get (@PathVariable("id") Long pid)
 	{
 		Post post = postServiceImpl.readPost(pid);
-		
+
 		return post;
 	}
+
 	
 	@PutMapping("/posts/{uid}/update/{pid}")
 	public ResponseEntity<String> updatepost(@PathVariable ("pid") long pid,@PathVariable("uid") long uid, Post post)
@@ -89,14 +74,14 @@ public class PostController {
 	}
 	
 	@PutMapping("/posts/{id}")
-	public ResponseEntity<String> deletePost(@PathVariable ("id") long pid ){
-		boolean result =postServiceImpl.delete(pid, pid);
-		String message ="Not deleted";
-		
-		if(result) {
-			message="Deleted";
-			return ResponseEntity.ok().body(message);		
-			}
+	public ResponseEntity<String> deletePost(@PathVariable("id") long pid) {
+		boolean result = postServiceImpl.delete(pid, pid);
+		String message = "Not deleted";
+
+		if (result) {
+			message = "Deleted";
+			return ResponseEntity.ok().body(message);
+		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
 	}
 }

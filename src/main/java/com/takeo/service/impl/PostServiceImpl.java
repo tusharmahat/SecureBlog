@@ -7,10 +7,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.takeo.dto.PostDto;
 import com.takeo.entity.Post;
 import com.takeo.entity.User;
 import com.takeo.exceptions.ResourceNotFoundException;
@@ -38,8 +40,22 @@ public class PostServiceImpl implements PostService {
 	private ImageNameGenerator fileNameGenerator;
 
 	@Override
-	public Post create(Post post) {
-		return postDaoImpl.save(post);
+	public String create(PostDto postDto, Long uid) {
+		Optional<User> existingUser = userDaoImpl.findById(uid);
+		String message = "Post not created";
+		if (existingUser.isPresent()) {
+			User user = existingUser.get();
+			Post post = new Post();
+			post.setUser(user);
+			BeanUtils.copyProperties(postDto, post);
+
+			Post savePost = postDaoImpl.save(post);
+			if (savePost != null) {
+				message = "Post  created";
+			}
+			return message;
+		}
+		throw new ResourceNotFoundException("User with uid " + uid + " not found");
 	}
 
 	@Override
@@ -61,35 +77,30 @@ public class PostServiceImpl implements PostService {
 		if (p != null && p.getUser().getUId() == uid) {
 			return p;
 		}
-
 		return null;
-
 	}
 
 	@Override
 	public Post update(Post post, Long uid, Long pid) {
 		// TODO Auto-generated method stub
-		
-		Post p= readPost(pid);
-		if(p!=null&&p.getUser().getUId()==uid)
-		{
-			return create(post);
+
+		Post p = readPost(pid);
+		if (p != null && p.getUser().getUId() == uid) {
+			return postDaoImpl.save(post);
 		}
-		
 		return null;
 	}
 
 	@Override
 	public boolean delete(Long pid, Long uid) {
 		// TODO Auto-generated method stub
-		Post p =readPost(pid);
-		if(p!=null&&p.getUser().getUId()==uid)
-		{
-			 postDaoImpl.deleteById(pid);
-			 return true;
+		Post p = readPost(pid);
+		if (p != null && p.getUser().getUId() == uid) {
+			postDaoImpl.deleteById(pid);
+			return true;
 		}
-		else throw new ResourceNotFoundException("Post with "+pid+"notfound");
-		
+		else throw new ResourceNotFoundException("Post with "+pid+"not found");
+	
 	}
 
 	@Override
@@ -134,5 +145,4 @@ public class PostServiceImpl implements PostService {
 		}
 		return null;
 	}
-
 }
