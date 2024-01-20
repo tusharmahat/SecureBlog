@@ -30,22 +30,25 @@ public class PostController {
 		String postSave = postServiceImpl.create(postDto, postDto.getUid());
 		return ResponseEntity.ok().body(postSave);
 	}
-
-	// get all posts of a user
+	
+	//get all posts of a user
 	@GetMapping("/posts/users/{uid}")
-	public ResponseEntity<?> getAll(@PathVariable long uid) {
-		List<Post> posts = postServiceImpl.read(uid);
-		if (posts != null) {
-			return ResponseEntity.ok(posts);
-		}
+	public ResponseEntity<?> getAll(@PathVariable long uid)
+	{
+	List<Post> posts=postServiceImpl.read(uid);
+	if(posts!=null)
+	{
+		return ResponseEntity.ok(posts);
+	}
 
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No posts avialable for this User");
 
 	}
-
-	// Get posts from post id
-	@GetMapping("/posts/{pid}")
-	public Post get(@PathVariable("pid") Long pid) {
+	
+	//Get posts from post id
+	@GetMapping("/posts/{id}")
+	public Post get (@PathVariable("id") Long pid)
+	{
 		Post post = postServiceImpl.readPost(pid);
 
 		return post;
