@@ -5,17 +5,18 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.takeo.dto.ResetPasswordDto;
+import com.takeo.dto.UserDto;
 import com.takeo.entity.User;
 
 public interface UserService {
 
 	String register(User user);
 
-	List<User> read();
+	List<UserDto> read();
 
-	User read(Long uid);
+//	User read(Long uid);
 
-	User update(User user);
+	UserDto update(UserDto user);
 
 	boolean delete(Long uid);
 
