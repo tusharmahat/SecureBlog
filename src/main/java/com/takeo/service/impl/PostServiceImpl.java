@@ -175,7 +175,6 @@ public class PostServiceImpl implements PostService {
 			} else {
 				return ("Only image files are allowed.");
 			}
-
 		}
 		return null;
 	}

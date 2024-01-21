@@ -53,6 +53,9 @@ public class CommentServiceImpl implements CommentService {
 		Optional<Post> existingPost = postDaoImpl.findById(pid);
 		if (existingPost.isPresent()) {
 			List<Comment> comments = existingPost.get().getComments();
+			if(comments.size()==0) {
+				throw new ResourceNotFoundException("Post with the pid " + pid + " has no comments");
+			}
 			List<CommentDto> commentsDto = new ArrayList<>();
 			for (Comment c : comments) {
 				CommentDto cDto = new CommentDto();

@@ -23,7 +23,7 @@ import com.takeo.dto.PostDto;
 import com.takeo.service.impl.PostServiceImpl;
 
 @RestController
-@RequestMapping("/blog/posts")
+@RequestMapping("/blog/post")
 public class PostController {
 
 	@Autowired
@@ -53,7 +53,6 @@ public class PostController {
 	}
 
 //	http://localhost:8080/blog/posts/{id}
-// Get posts from post id
 	@GetMapping("/get/{id}")
 	public ResponseEntity<Map<String, PostDto>> get(@PathVariable("id") Long pid) {
 		PostDto post = postServiceImpl.readPost(pid);
