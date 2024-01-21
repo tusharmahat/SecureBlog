@@ -33,8 +33,8 @@ import com.takeo.utils.PasswordGenerator;
 @Service
 public class UserServiceImpl implements UserService {
 
-//	private final String DB_PATH ="/Users/tusharmahat/db/";
-	private final String DB_PATH ="C:\\Users\\himal\\OneDrive\\Desktop\\db\\";
+	private final String DB_PATH = "/Users/tusharmahat/db/";
+//	private final String DB_PATH ="C:\\Users\\himal\\OneDrive\\Desktop\\db\\";
 	@Autowired
 	private UserRepo daoImpl;
 
@@ -89,18 +89,19 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public UserDto update(UserDto user) {
-		Optional<User> existingUser = daoImpl.findById(user.getUId());
+	public String update(UserDto user) {
+		Optional<User> existingUser = daoImpl.findByEmail(user.getEmail());
+		String message = "User not updated";
 		if (existingUser.isPresent()) {
 			User u = existingUser.get();
 
 			user.setUId(u.getUId());
 			BeanUtils.copyProperties(user, u);
 			User saveUser = daoImpl.save(u);
-
-			UserDto uDto = new UserDto();
-			BeanUtils.copyProperties(saveUser, uDto);
-			return uDto;
+			if (saveUser != null) {
+				message = "User updated";
+			}
+			return message;
 		}
 		throw new ResourceNotFoundException("User not found");// exception
 	}

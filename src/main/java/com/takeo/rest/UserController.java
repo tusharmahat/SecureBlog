@@ -26,14 +26,14 @@ import com.takeo.entity.User;
 import com.takeo.service.impl.UserServiceImpl;
 
 @RestController
-@RequestMapping("/blog")
+@RequestMapping("/blog/user")
 public class UserController {
 
 	@Autowired
 	private UserServiceImpl userServiceImpl;
 
 //	http://localhost:8080/blog/users
-	@PostMapping("/users")
+	@PostMapping("/register")
 	public ResponseEntity<Map<String, String>> register(@RequestBody User user) {
 		String userRegistration = userServiceImpl.register(user);
 		String message = "Message";
@@ -43,7 +43,7 @@ public class UserController {
 	}
 
 //	http://localhost:8080/blog/users
-	@GetMapping("/users")
+	@GetMapping("/get")
 	public ResponseEntity<List<UserDto>> getAll() {
 		List<UserDto> users = userServiceImpl.read();
 
@@ -51,7 +51,7 @@ public class UserController {
 	}
 
 //	http://localhost:8080/blog/users/1
-	@DeleteMapping("/users/{id}")
+	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<String> deleteUser(@PathVariable("id") Long uid) {
 
 		boolean result = userServiceImpl.delete(uid);
@@ -64,18 +64,18 @@ public class UserController {
 	}
 
 //	http://localhost:8080/blog/users/1
-	@PutMapping("/users")
-	public ResponseEntity<Map<String, Object>> putUser(@RequestBody UserDto user) {
-		UserDto userDto = userServiceImpl.update(user);
+	@PutMapping("/update")
+	public ResponseEntity<Map<String, String>> putUser(@RequestBody UserDto user) {
+		String userDto = userServiceImpl.update(user);
 		String message = "Message";
-		Map<String, Object> response = new HashMap<>();
+		Map<String, String> response = new HashMap<>();
 		response.put(message, userDto);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 
 	}
 
 //	http://localhost:8080/blog/user/verify/{otp}
-	@PostMapping("/user/verify/{otp}")
+	@PostMapping("/verify/{otp}")
 	public ResponseEntity<Map<String, String>> verifyOtp(@PathVariable("otp") String otp) {
 		String verifyOtp = userServiceImpl.verifyOtp(otp);
 		String message = "Message";
@@ -85,7 +85,7 @@ public class UserController {
 	}
 
 //	http://localhost:8080/blog/user/login
-	@GetMapping("/user/login")
+	@GetMapping("/login")
 	public ResponseEntity<Map<String, String>> login(@RequestBody LoginDto loginDto) {
 		String login = userServiceImpl.userLogin(loginDto.getEmail(), loginDto.getPassword());
 		String message = "Message";
@@ -95,7 +95,7 @@ public class UserController {
 	}
 
 //	http://localhost:8080/blog/user/forgotpassword/{email}
-	@PostMapping("user/forgotpassword/{email}")
+	@PostMapping("/forgotpassword/{email}")
 	public ResponseEntity<Map<String, String>> forgotPassword(@PathVariable String email) {
 		String resetPassword = userServiceImpl.forgotPassword(email);
 		String message = "Message";
@@ -105,7 +105,7 @@ public class UserController {
 	}
 
 //	http://localhost:8080/blog/user/changepassword
-	@PostMapping("user/changepassword")
+	@PostMapping("/changepassword")
 	public ResponseEntity<Map<String, String>> changePassword(@RequestBody ResetPasswordDto resetPassDto) {
 		String changePassword = userServiceImpl.changePassword(resetPassDto);
 		String message = "Message";
@@ -115,7 +115,7 @@ public class UserController {
 	}
 
 //	http://localhost:8080/blog/user/updateprofilepic
-	@PostMapping("user/updateprofilepic")
+	@PostMapping("/updateprofilepic")
 	public ResponseEntity<Map<String, String>> updateProfilePic(@RequestParam("file") MultipartFile file,
 			@RequestParam("email") String email) {
 		String updatePicture = userServiceImpl.updateProfilePicture(file, email);
@@ -126,7 +126,7 @@ public class UserController {
 	}
 
 //	http://localhost:8080/blog/user/profilepic/{email}
-	@GetMapping("user/profilepic/{email}")
+	@GetMapping("/profilepic/{email}")
 	public ResponseEntity<byte[]> getProfilePic(@PathVariable("email") String email) {
 		byte[] profilePic = userServiceImpl.viewProfilePicture(email);
 		return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.valueOf("image/png")).body(profilePic);
