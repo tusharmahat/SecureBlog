@@ -9,8 +9,6 @@ public class PostDto {
 
 		private String title;
 		
-		private String category;
-		
 		private String content;
 
 		private  Long uid;
