@@ -72,6 +72,7 @@ public class PostController {
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
+
 	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<Map<String, String>> deletePost(@PathVariable("id") long pid) {
 		String updatePicture = postServiceImpl.delete(pid);
