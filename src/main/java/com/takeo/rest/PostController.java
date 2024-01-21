@@ -4,10 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,22 +20,21 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.takeo.dto.PostDto;
-import com.takeo.entity.Post;
 import com.takeo.service.impl.PostServiceImpl;
 
 @RestController
-@RequestMapping("/blog")
+@RequestMapping("/blog/posts")
 public class PostController {
 
 	@Autowired
 	private PostServiceImpl postServiceImpl;
 
-//	http://localhost:8080/blog/posts
-	@PostMapping("/posts")
-	public ResponseEntity<Map<String, String>> createPost(@RequestBody PostDto postDto) {
+//	http://localhost:8080/blog/posts/create/{uid}
+	@PostMapping("/create/{uid}")
+	public ResponseEntity<Map<String, String>> createPost(@PathVariable("uid") Long uid, @RequestBody PostDto postDto) {
 
 		String message = "Message";
-		String postSave = postServiceImpl.create(postDto, postDto.getUid());
+		String postSave = postServiceImpl.create(postDto, uid);
 
 		Map<String, String> response = new HashMap<>();
 
@@ -43,63 +43,67 @@ public class PostController {
 	}
 
 	// get all posts of a user
-	@GetMapping("/posts/users/{uid}")
-	public ResponseEntity<?> getAll(@PathVariable long uid) {
-		List<Post> posts = postServiceImpl.read(uid);
-		if (posts != null) {
-			return ResponseEntity.ok(posts);
-		}
-
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No posts avialable for this User");
-
+	@GetMapping("/get/users/{uid}")
+	public ResponseEntity<?> getAll(@PathVariable("uid") long uid) {
+		List<PostDto> posts = postServiceImpl.read(uid);
+		String message = "Posts:";
+		Map<String, List<PostDto>> response = new HashMap<>();
+		response.put(message, posts);
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
 //	http://localhost:8080/blog/posts/{id}
 // Get posts from post id
-	@GetMapping("/posts/{id}")
-	public ResponseEntity<Post> get(@PathVariable("id") Long pid) {
-		Post post = postServiceImpl.readPost(pid);
-
-		return ResponseEntity.ok(post);
+	@GetMapping("/get/{id}")
+	public ResponseEntity<Map<String, PostDto>> get(@PathVariable("id") Long pid) {
+		PostDto post = postServiceImpl.readPost(pid);
+		String message = "Posts:";
+		Map<String, PostDto> response = new HashMap<>();
+		response.put(message, post);
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
-
-=======
-	@PutMapping("/posts/{uid}/update/{pid}")
-	public ResponseEntity<String> updatepost(@PathVariable("pid") long pid, @PathVariable("uid") long uid,@RequestBody PostDto post) {
-		Post existingPost = postServiceImpl.update(post, uid, pid);
-		String message = "Post not updated";
-
-		if (existingPost != null) {
-			message = "Post details updated";
-			return ResponseEntity.ok().body(message);
-		}
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
+	@PutMapping("/users/{uid}/update/{pid}")
+	public ResponseEntity<Map<String, String>> updatepost(@PathVariable("pid") long pid, @PathVariable("uid") long uid,
+			@RequestBody PostDto post) {
+		String existingPost = postServiceImpl.update(post, uid, pid);
+		String message = "Message";
+		Map<String, String> response = new HashMap<>();
+		response.put(message, existingPost);
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
-//	http://localhost:8080/blog/posts/updatepostpic	
-	@PostMapping("/posts/updatepostpic")
-	public ResponseEntity<Map<String,  String>> updatePostPic(@RequestParam("file")MultipartFile file,
-			@RequestParam("pid") Long pid){
-		String updatePicture =postServiceImpl.updatePostPicture(file, pid);
-		String message ="Message";
-		
-		Map<String, String> response= new HashMap<>();
-		
+	@DeleteMapping("/delete/{id}")
+	public ResponseEntity<Map<String, String>> deletePost(@PathVariable("id") long pid) {
+		String updatePicture = postServiceImpl.delete(pid);
+		String message = "Message";
+
+		Map<String, String> response = new HashMap<>();
+
 		response.put(message, updatePicture);
-		
+
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	@PutMapping("/posts/{id}")
-	public ResponseEntity<String> deletePost(@PathVariable("id") long pid) {
-		boolean result = postServiceImpl.delete(pid, pid);
-		String message = "Not deleted";
+//	http://localhost:8080/blog/posts/updatepostpic
+	@PostMapping("/updatepostpic")
+	public ResponseEntity<Map<String, String>> updatePostPic(@RequestParam("file") MultipartFile file,
+			@RequestParam("pid") Long pid) {
+		String updatePicture = postServiceImpl.updatePostPicture(file, pid);
+		String message = "Message";
 
-		if (result) {
-			message = "Deleted";
-			return ResponseEntity.ok().body(message);
-		}
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
+		Map<String, String> response = new HashMap<>();
+
+		response.put(message, updatePicture);
+
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
+
+//	http://localhost:8080/blog/posts/viewpostpic/{pid}	
+	@GetMapping("/viewpostpic/{pid}")
+	public ResponseEntity<byte[]> updatePostPic(@PathVariable("pid") Long pid) {
+		byte[] profilePic = postServiceImpl.viewPostPicture(pid);
+		return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.valueOf("image/png")).body(profilePic);
+	}
+
 }

@@ -1,7 +1,8 @@
 package com.takeo.entity;
 
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -17,7 +18,6 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.Data;
@@ -28,27 +28,28 @@ import lombok.Data;
 public class Post {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="pid")
+	@Column(name = "pid")
 	private Long pid;
-	
-	@Column(name="title")
+
+	@Column(name = "title")
 	private String title;
-	
-	@Column(name="category")
+
+	@Column(name = "category")
 	private String category;
-	
+
 	@JsonIgnore
 	private String image;
-	
-	@Column(name="content")
+
+	@Column(name = "content")
 	private String content;
-	
+
 	@ManyToOne
-	@JoinColumn(name="uid")
-	private  User user;
-	
-	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+	@JoinColumn(name = "uid")
 	@JsonIgnore
-	private Set<Comment> comments = new HashSet<>();
+	private User user;
+
+	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JsonIgnore
+	private List<Comment> comments = new ArrayList<>();;
 
 }
