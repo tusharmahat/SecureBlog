@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.takeo.dto.PostDto;
 import com.takeo.entity.Post;
@@ -30,6 +32,7 @@ public class PostController {
 //	http://localhost:8080/blog/posts
 	@PostMapping("/posts")
 	public ResponseEntity<Map<String, String>> createPost(@RequestBody PostDto postDto) {
+
 		String message = "Message";
 		String postSave = postServiceImpl.create(postDto, postDto.getUid());
 
@@ -51,7 +54,8 @@ public class PostController {
 
 	}
 
-	// Get posts from post id
+//	http://localhost:8080/blog/posts/{id}
+// Get posts from post id
 	@GetMapping("/posts/{id}")
 	public ResponseEntity<Post> get(@PathVariable("id") Long pid) {
 		Post post = postServiceImpl.readPost(pid);
@@ -59,6 +63,8 @@ public class PostController {
 		return ResponseEntity.ok(post);
 	}
 
+
+=======
 	@PutMapping("/posts/{uid}/update/{pid}")
 	public ResponseEntity<String> updatepost(@PathVariable("pid") long pid, @PathVariable("uid") long uid,@RequestBody PostDto post) {
 		Post existingPost = postServiceImpl.update(post, uid, pid);
@@ -66,11 +72,23 @@ public class PostController {
 
 		if (existingPost != null) {
 			message = "Post details updated";
-		
 			return ResponseEntity.ok().body(message);
 		}
-
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
+	}
+
+//	http://localhost:8080/blog/posts/updatepostpic	
+	@PostMapping("/posts/updatepostpic")
+	public ResponseEntity<Map<String,  String>> updatePostPic(@RequestParam("file")MultipartFile file,
+			@RequestParam("pid") Long pid){
+		String updatePicture =postServiceImpl.updatePostPicture(file, pid);
+		String message ="Message";
+		
+		Map<String, String> response= new HashMap<>();
+		
+		response.put(message, updatePicture);
+		
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 	@PutMapping("/posts/{id}")

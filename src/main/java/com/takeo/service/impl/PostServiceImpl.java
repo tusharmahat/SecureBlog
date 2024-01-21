@@ -2,6 +2,8 @@ package com.takeo.service.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -71,22 +73,22 @@ public class PostServiceImpl implements PostService {
 	@Override
 	public Post readPost(Long pid) {
 		Optional<Post> post = postDaoImpl.findById(pid);
-
 		if (post.isPresent()) {
-			Post returnPost = post.get();
+			Post returnPost= post.get();
 			return returnPost;
 		}
-		throw new ResourceNotFoundException("ffds");
+		throw new ResourceNotFoundException("Post with "+pid+" not found");
 	}
 
 	@Override
 	public Post readPost(Long uid, Long pid) {
 		// TODO Auto-generated method stub
 		Post p = readPost(pid);
-		if (p.getUser().getUId() == uid) {
+		if (p.getUser().getUId()==uid) {
+			
 			return p;
 		}
-		throw new ResourceNotFoundException("ffds");
+		throw new ResourceNotFoundException("User: "+uid+"Post pid: "+pid+" not found");
 	}
 
 	@Override
@@ -96,11 +98,12 @@ public class PostServiceImpl implements PostService {
 		Post existingPost = readPost(pid);
 		if (existingPost.getUser().getUId() == uid) {
 			post.setPid(existingPost.getPid());
+
 			modelMapper.map(post, existingPost);
 
 			return postDaoImpl.save(existingPost);
 		}
-		return null;
+		throw new ResourceNotFoundException("Update failed");
 	}
 
 	@Override
@@ -112,14 +115,20 @@ public class PostServiceImpl implements PostService {
 			return true;
 		} else
 			throw new ResourceNotFoundException("Post with " + pid + "not found");
-
 	}
 
 	@Override
 	public byte[] viewPostPicture(Long pid) {
-		// TODO Auto-generated method stub
-
-		return null;
+		Optional<Post> post=postDaoImpl.findById(pid);
+		if(post.isPresent())
+		{
+			try {
+				return Files.readAllBytes(Paths.get(DB_PATH));
+			}catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		throw new ResourceNotFoundException("Post  not found with post id: "+pid);
 	}
 
 	@Override

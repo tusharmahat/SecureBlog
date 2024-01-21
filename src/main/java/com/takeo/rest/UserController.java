@@ -118,10 +118,10 @@ public class UserController {
 	@PostMapping("user/updateprofilepic")
 	public ResponseEntity<Map<String, String>> updateProfilePic(@RequestParam("file") MultipartFile file,
 			@RequestParam("email") String email) {
-		String updatePassword = userServiceImpl.updateProfilePicture(file, email);
+		String updatePicture = userServiceImpl.updateProfilePicture(file, email);
 		String message = "Message";
 		Map<String, String> response = new HashMap<>();
-		response.put(message, updatePassword);
+		response.put(message, updatePicture);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
