@@ -63,8 +63,6 @@ public class PostController {
 		return ResponseEntity.ok(post);
 	}
 
-
-=======
 	@PutMapping("/posts/{uid}/update/{pid}")
 	public ResponseEntity<String> updatepost(@PathVariable("pid") long pid, @PathVariable("uid") long uid,@RequestBody PostDto post) {
 		Post existingPost = postServiceImpl.update(post, uid, pid);

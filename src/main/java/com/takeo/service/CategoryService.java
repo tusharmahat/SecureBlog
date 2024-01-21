@@ -9,13 +9,13 @@ public interface CategoryService {
 	
 	String create (CategoryDto category);
 	
-	List<Category> readAll(Long categoryId);
+	List<CategoryDto> readAll();
 	
-	Category readCategory(Long categoryId, Long pid);
+	CategoryDto readCategory(Long categoryId);
 	
-	Category update (CategoryDto category, Long categoryId);
+	String update (CategoryDto category, Long categoryId);
 	
-	boolean delete(Long categoryId);
+	String delete(Long categoryId);
 	
 	
 	
