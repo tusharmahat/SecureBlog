@@ -32,52 +32,51 @@ public class PostController {
 //	http://localhost:8080/blog/posts
 	@PostMapping("/posts")
 	public ResponseEntity<Map<String, String>> createPost(@RequestBody PostDto postDto) {
-		String message ="Post Created";
+
+		String message = "Message";
 		String postSave = postServiceImpl.create(postDto, postDto.getUid());
-		Map<String,String> response = new HashMap<>();
+
+		Map<String, String> response = new HashMap<>();
+
 		response.put(message, postSave);
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
-	
-	//get all posts of a user
-//	http://localhost:8080/blog/posts/users/{uid}
+
+	// get all posts of a user
 	@GetMapping("/posts/users/{uid}")
-	public ResponseEntity<?> getAll(@PathVariable long uid)
-	{
-	List<Post> posts=postServiceImpl.read(uid);
-	if(posts!=null)
-	{
-		return ResponseEntity.ok(posts);
-	}
+	public ResponseEntity<?> getAll(@PathVariable long uid) {
+		List<Post> posts = postServiceImpl.read(uid);
+		if (posts != null) {
+			return ResponseEntity.ok(posts);
+		}
 
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No posts avialable for this User");
 
 	}
-	
+
 //	http://localhost:8080/blog/posts/{id}
+// Get posts from post id
 	@GetMapping("/posts/{id}")
-	public Post get (@PathVariable("id") Long pid)
-	{
+	public ResponseEntity<Post> get(@PathVariable("id") Long pid) {
 		Post post = postServiceImpl.readPost(pid);
 
-		return post;
+		return ResponseEntity.ok(post);
 	}
 
-//	http://localhost:8080/blog/posts/{uid}/update/{pid}	
+
+=======
 	@PutMapping("/posts/{uid}/update/{pid}")
-	public ResponseEntity<String> updatepost(@PathVariable ("pid") long pid,@PathVariable("uid") long uid, @RequestBody PostDto post)
-	{
-		Post existingPost= postServiceImpl.update(post, uid, pid);
-		String message ="Post not updated";
-		
-		if(existingPost!=null) {
-			message="Post details updated";
-			
+	public ResponseEntity<String> updatepost(@PathVariable("pid") long pid, @PathVariable("uid") long uid,@RequestBody PostDto post) {
+		Post existingPost = postServiceImpl.update(post, uid, pid);
+		String message = "Post not updated";
+
+		if (existingPost != null) {
+			message = "Post details updated";
 			return ResponseEntity.ok().body(message);
 		}
-		
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
 	}
+
 //	http://localhost:8080/blog/posts/updatepostpic	
 	@PostMapping("/posts/updatepostpic")
 	public ResponseEntity<Map<String,  String>> updatePostPic(@RequestParam("file")MultipartFile file,
@@ -91,8 +90,7 @@ public class PostController {
 		
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
-	
-	
+
 	@PutMapping("/posts/{id}")
 	public ResponseEntity<String> deletePost(@PathVariable("id") long pid) {
 		boolean result = postServiceImpl.delete(pid, pid);
