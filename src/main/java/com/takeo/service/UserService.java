@@ -14,9 +14,7 @@ public interface UserService {
 
 	List<UserDto> read();
 
-//	User read(Long uid);
-
-	UserDto update(UserDto user);
+	String update(UserDto user);
 
 	boolean delete(Long uid);
 
