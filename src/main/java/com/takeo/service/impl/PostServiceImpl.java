@@ -66,6 +66,21 @@ public class PostServiceImpl implements PostService {
 	}
 
 	@Override
+	public List<PostDto> read() {
+		List<Post> posts = postDaoImpl.findAll();
+		List<PostDto> postsDto = new ArrayList<>();
+		if (posts.size() != 0) {
+			for (Post p : posts) {
+				PostDto postDto = new PostDto();
+				BeanUtils.copyProperties(p, postDto);
+				postsDto.add(postDto);
+			}
+			return postsDto;
+		}
+		throw new ResourceNotFoundException("No posts found");
+	}
+
+	@Override
 	public List<PostDto> read(Long uid) {
 		Optional<User> existingUser = userDaoImpl.findById(uid);
 		if (existingUser.isPresent()) {

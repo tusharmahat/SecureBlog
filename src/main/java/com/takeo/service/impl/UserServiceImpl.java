@@ -48,16 +48,18 @@ public class UserServiceImpl implements UserService {
 	private ImageNameGenerator fileNameGenerator;
 
 	@Override
-	public String register(User user) {
-		Optional<User> existingUser = daoImpl.findByEmail(user.getEmail());
+	public String register(UserDto userDto) {
+		Optional<User> existingUser = daoImpl.findByEmail(userDto.getEmail());
 		String message = "Registration failed";
 		if (existingUser.isEmpty()) {
 			// create a otp
 			String otp = OtpGenerator.generate();
 
 			// send otp
-			emailService.sendMail(user.getEmail(), "OTP", "Your OTP is " + otp);
-
+			emailService.sendMail(userDto.getEmail(), "OTP", "Your OTP is " + otp);
+			
+			User user=new User();
+			BeanUtils.copyProperties(userDto, user);
 			// save the otp for the user
 			user.setOtp(otp);
 			message = "Registration Success";
@@ -104,18 +106,6 @@ public class UserServiceImpl implements UserService {
 			return message;
 		}
 		throw new ResourceNotFoundException("User not found");// exception
-	}
-
-	@Override
-	public boolean delete(Long uid) {
-		Optional<User> existingUser = daoImpl.findById(uid);
-
-		if (existingUser.isPresent()) {
-			daoImpl.deleteById(uid);
-			return true;
-		} else {
-			throw new ResourceNotFoundException("User with uid: " + uid + "not found ");
-		}
 	}
 
 	@Override

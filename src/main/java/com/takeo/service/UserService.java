@@ -6,17 +6,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.takeo.dto.ResetPasswordDto;
 import com.takeo.dto.UserDto;
-import com.takeo.entity.User;
 
 public interface UserService {
 
-	String register(User user);
+	String register(UserDto user);
 
 	List<UserDto> read();
 
 	String update(UserDto user);
-
-	boolean delete(Long uid);
 
 	public String verifyOtp(String otp);
 

@@ -3,7 +3,6 @@ package com.takeo.service;
 import java.util.List;
 
 import com.takeo.dto.CategoryDto;
-import com.takeo.entity.Category;
 
 public interface CategoryService {
 	

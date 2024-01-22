@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.takeo.dto.LoginDto;
 import com.takeo.dto.ResetPasswordDto;
 import com.takeo.dto.UserDto;
-import com.takeo.entity.User;
 import com.takeo.service.impl.UserServiceImpl;
 
 @RestController
@@ -34,8 +35,8 @@ public class UserController {
 
 //	http://localhost:8080/blog/user/register
 	@PostMapping("/register")
-	public ResponseEntity<Map<String, String>> register(@RequestBody User user) {
-		String userRegistration = userServiceImpl.register(user);
+	public ResponseEntity<Map<String, String>> register(@Valid @RequestBody UserDto userDto) {
+		String userRegistration = userServiceImpl.register(userDto);
 		String message = "Message";
 		Map<String, String> response = new HashMap<>();
 		response.put(message, userRegistration);
@@ -65,11 +66,11 @@ public class UserController {
 
 //	http://localhost:8080/blog/user/update
 	@PutMapping("/update")
-	public ResponseEntity<Map<String, String>> putUser(@RequestBody UserDto user) {
-		String userDto = userServiceImpl.update(user);
+	public ResponseEntity<Map<String, String>> putUser(@Valid @RequestBody UserDto userDto) {
+		String updateUser = userServiceImpl.update(userDto);
 		String message = "Message";
 		Map<String, String> response = new HashMap<>();
-		response.put(message, userDto);
+		response.put(message, updateUser);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 
 	}
@@ -86,7 +87,7 @@ public class UserController {
 
 //	http://localhost:8080/blog/user/login
 	@GetMapping("/login")
-	public ResponseEntity<Map<String, String>> login(@RequestBody LoginDto loginDto) {
+	public ResponseEntity<Map<String, String>> login(@Valid @RequestBody LoginDto loginDto) {
 		String login = userServiceImpl.userLogin(loginDto.getEmail(), loginDto.getPassword());
 		String message = "Message";
 		Map<String, String> response = new HashMap<>();
@@ -106,7 +107,7 @@ public class UserController {
 
 //	http://localhost:8080/blog/user/changepassword
 	@PostMapping("/changepassword")
-	public ResponseEntity<Map<String, String>> changePassword(@RequestBody ResetPasswordDto resetPassDto) {
+	public ResponseEntity<Map<String, String>> changePassword(@Valid @RequestBody ResetPasswordDto resetPassDto) {
 		String changePassword = userServiceImpl.changePassword(resetPassDto);
 		String message = "Message";
 		Map<String, String> response = new HashMap<>();

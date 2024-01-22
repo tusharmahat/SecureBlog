@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -31,7 +33,8 @@ public class PostController {
 
 //	http://localhost:8080/blog/post/create/{uid}
 	@PostMapping("/create/{uid}")
-	public ResponseEntity<Map<String, String>> createPost(@PathVariable("uid") Long uid, @RequestBody PostDto postDto) {
+	public ResponseEntity<Map<String, String>> createPost(@PathVariable("uid") Long uid,
+			@Valid @RequestBody PostDto postDto) {
 
 		String message = "Message";
 		String postSave = postServiceImpl.create(postDto, uid);
@@ -44,7 +47,7 @@ public class PostController {
 
 //	http://localhost:8080/blog/post/get/users/{uid}
 	@GetMapping("/get/users/{uid}")
-	public ResponseEntity<?> getAll(@PathVariable("uid") long uid) {
+	public ResponseEntity<?> getAllFromUser(@PathVariable("uid") long uid) {
 		List<PostDto> posts = postServiceImpl.read(uid);
 		String message = "Posts:";
 		Map<String, List<PostDto>> response = new HashMap<>();
@@ -52,7 +55,17 @@ public class PostController {
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
-//	http://localhost:8080/blog/post/get/{id}
+	// http://localhost:8080/blog/post/get
+	@GetMapping("/get")
+	public ResponseEntity<?> getAll() {
+		List<PostDto> posts = postServiceImpl.read();
+		String message = "Posts:";
+		Map<String, List<PostDto>> response = new HashMap<>();
+		response.put(message, posts);
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
+	}
+
+//	http://localhost:8080/blog/posts/get/{id}
 	@GetMapping("/get/{id}")
 	public ResponseEntity<Map<String, PostDto>> get(@PathVariable("id") Long pid) {
 		PostDto post = postServiceImpl.readPost(pid);
@@ -61,16 +74,18 @@ public class PostController {
 		response.put(message, post);
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
+  
 //	http://localhost:8080/blog/post/users/{uid}/update/{pid}
 	@PutMapping("/users/{uid}/update/{pid}")
 	public ResponseEntity<Map<String, String>> updatepost(@PathVariable("pid") long pid, @PathVariable("uid") long uid,
-			@RequestBody PostDto post) {
+			@Valid @RequestBody PostDto post) {
 		String existingPost = postServiceImpl.update(post, uid, pid);
 		String message = "Message";
 		Map<String, String> response = new HashMap<>();
 		response.put(message, existingPost);
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
+
 
 //	http://localhost:8080/blog/post/delete/{id}
 	@DeleteMapping("/delete/{id}")

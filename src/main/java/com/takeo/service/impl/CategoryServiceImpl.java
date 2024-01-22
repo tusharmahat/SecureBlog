@@ -76,7 +76,6 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Override
 	public String update(CategoryDto category, Long categoryId) {
-		// TODO Auto-generated method stub
 		String message ="Not updated";
 		Optional<Category> existingCategory =catDaoImpl.findById(categoryId);
 		
@@ -88,8 +87,6 @@ public class CategoryServiceImpl implements CategoryService {
 			Category cate= existingCategory.get();
 			modelMapper.map(category, cate);
 			Category saveCat= catDaoImpl.save(cate);
-			
-			
 			return message="Updated";
 		}
 		throw new ResourceNotFoundException("Category not found");
@@ -97,7 +94,6 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Override
 	public String delete(Long categoryId) {
-		// TODO Auto-generated method stub
 		String message="Category not deleted";
 		Optional<Category> category = catDaoImpl.findById(categoryId);
 		
