@@ -27,7 +27,7 @@ public class CommentController {
 
 	@Autowired
 	private CommentService commentService;
-
+//	http://localhost:8080/blog/comment/create/{uid}/{pid}
 	@PostMapping("/create/{uid}/{pid}")
 	public ResponseEntity<Map<String, String>> createComment(@PathVariable("uid") Long uid,
 			@PathVariable("pid") Long pid, @Valid @RequestBody CommentDto commentDto) {
@@ -37,7 +37,7 @@ public class CommentController {
 		response.put(message, createComment);
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
-
+//	http://localhost:8080/blog/comment/get/{pid}
 	@GetMapping("/get/{pid}")
 	public ResponseEntity<Map<String, List<CommentDto>>> getComments(@PathVariable("pid") Long pid) {
 		List<CommentDto> getComments = commentService.getComments(pid);
@@ -46,7 +46,7 @@ public class CommentController {
 		response.put(message, getComments);
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
-
+//	http://localhost:8080/blog/comment/getone/{cid}
 	@GetMapping("/getone/{cid}")
 	public ResponseEntity<Map<String, CommentDto>> getComment(@PathVariable("cid") Long cid) {
 		CommentDto getComment = commentService.getComment(cid);
@@ -55,7 +55,7 @@ public class CommentController {
 		response.put(message, getComment);
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
-
+//	http://localhost:8080/blog/comment/update/{cid}
 	@PutMapping("/update/{cid}")
 	public ResponseEntity<Map<String, String>> updateComment(@PathVariable("cid") Long cid,
 			@RequestBody CommentDto commentDto) {
@@ -65,7 +65,7 @@ public class CommentController {
 		response.put(message, updateComment);
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
-
+//	http://localhost:8080/blog/comment/delete/{cid}
 	@DeleteMapping("/delete/{cid}")
 	public ResponseEntity<Map<String, String>> deleteComment(@PathVariable("cid") Long cid) {
 		String deleteComment = commentService.deleteComment(cid);

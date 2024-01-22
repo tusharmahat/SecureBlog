@@ -31,7 +31,7 @@ public class PostController {
 	@Autowired
 	private PostServiceImpl postServiceImpl;
 
-//	http://localhost:8080/blog/posts/create/{uid}
+//	http://localhost:8080/blog/post/create/{uid}
 	@PostMapping("/create/{uid}")
 	public ResponseEntity<Map<String, String>> createPost(@PathVariable("uid") Long uid,
 			@Valid @RequestBody PostDto postDto) {
@@ -45,7 +45,7 @@ public class PostController {
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
-	// get all posts of a user
+//	http://localhost:8080/blog/post/get/users/{uid}
 	@GetMapping("/get/users/{uid}")
 	public ResponseEntity<?> getAllFromUser(@PathVariable("uid") long uid) {
 		List<PostDto> posts = postServiceImpl.read(uid);
@@ -65,7 +65,7 @@ public class PostController {
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
-//	http://localhost:8080/blog/posts/{id}
+//	http://localhost:8080/blog/posts/get/{id}
 	@GetMapping("/get/{id}")
 	public ResponseEntity<Map<String, PostDto>> get(@PathVariable("id") Long pid) {
 		PostDto post = postServiceImpl.readPost(pid);
@@ -74,7 +74,8 @@ public class PostController {
 		response.put(message, post);
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
-
+  
+//	http://localhost:8080/blog/post/users/{uid}/update/{pid}
 	@PutMapping("/users/{uid}/update/{pid}")
 	public ResponseEntity<Map<String, String>> updatepost(@PathVariable("pid") long pid, @PathVariable("uid") long uid,
 			@Valid @RequestBody PostDto post) {
@@ -85,19 +86,21 @@ public class PostController {
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
+
+//	http://localhost:8080/blog/post/delete/{id}
 	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<Map<String, String>> deletePost(@PathVariable("id") long pid) {
-		String updatePicture = postServiceImpl.delete(pid);
+		String deletePost = postServiceImpl.delete(pid);
 		String message = "Message";
 
 		Map<String, String> response = new HashMap<>();
 
-		response.put(message, updatePicture);
+		response.put(message, deletePost);
 
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-//	http://localhost:8080/blog/posts/updatepostpic
+//	http://localhost:8080/blog/post/updatepostpic
 	@PostMapping("/updatepostpic")
 	public ResponseEntity<Map<String, String>> updatePostPic(@RequestParam("file") MultipartFile file,
 			@RequestParam("pid") Long pid) {
@@ -111,7 +114,7 @@ public class PostController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-//	http://localhost:8080/blog/posts/viewpostpic/{pid}	
+//	http://localhost:8080/blog/post/viewpostpic/{pid}	
 	@GetMapping("/viewpostpic/{pid}")
 	public ResponseEntity<byte[]> updatePostPic(@PathVariable("pid") Long pid) {
 		byte[] profilePic = postServiceImpl.viewPostPicture(pid);

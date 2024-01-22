@@ -33,7 +33,7 @@ public class UserController {
 	@Autowired
 	private UserServiceImpl userServiceImpl;
 
-//	http://localhost:8080/blog/users
+//	http://localhost:8080/blog/user/register
 	@PostMapping("/register")
 	public ResponseEntity<Map<String, String>> register(@Valid @RequestBody UserDto userDto) {
 		String userRegistration = userServiceImpl.register(userDto);
@@ -43,7 +43,7 @@ public class UserController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-//	http://localhost:8080/blog/users
+//	http://localhost:8080/blog/user/get
 	@GetMapping("/get")
 	public ResponseEntity<List<UserDto>> getAll() {
 		List<UserDto> users = userServiceImpl.read();
@@ -51,7 +51,20 @@ public class UserController {
 		return ResponseEntity.ok().body(users);
 	}
 
-//	http://localhost:8080/blog/users/1
+//	http://localhost:8080/blog/user/delete/{id}
+	@DeleteMapping("/delete/{id}")
+	public ResponseEntity<String> deleteUser(@PathVariable("id") Long uid) {
+
+		boolean result = userServiceImpl.delete(uid);
+		String message = "Not deleted";
+		if (result) {
+			message = "Deleted";
+			return ResponseEntity.ok().body(message);
+		}
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
+	}
+
+//	http://localhost:8080/blog/user/update
 	@PutMapping("/update")
 	public ResponseEntity<Map<String, String>> putUser(@Valid @RequestBody UserDto userDto) {
 		String updateUser = userServiceImpl.update(userDto);

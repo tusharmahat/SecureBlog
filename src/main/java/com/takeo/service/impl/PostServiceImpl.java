@@ -29,8 +29,8 @@ import com.takeo.utils.ImageNameGenerator;
 
 @Service
 public class PostServiceImpl implements PostService {
-	private final String DB_PATH = "/Users/tusharmahat/db/";
-//	private final String DB_PATH = "C:\\Users\\himal\\OneDrive\\Desktop\\db\\";
+	//private final String DB_PATH = "/Users/tusharmahat/db/";
+	private final String DB_PATH = "C:\\Users\\himal\\OneDrive\\Desktop\\db\\";
 
 	@Autowired
 	private ModelMapper modelMapper;
