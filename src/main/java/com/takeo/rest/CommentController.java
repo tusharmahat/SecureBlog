@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.takeo.dto.CommentDto;
-import com.takeo.entity.Comment;
 import com.takeo.service.CommentService;
 
 @RestController
@@ -29,8 +30,8 @@ public class CommentController {
 
 	@PostMapping("/create/{uid}/{pid}")
 	public ResponseEntity<Map<String, String>> createComment(@PathVariable("uid") Long uid,
-			@PathVariable("pid") Long pid, @RequestBody Comment comment) {
-		String createComment = commentService.createComment(uid, pid, comment);
+			@PathVariable("pid") Long pid, @Valid @RequestBody CommentDto commentDto) {
+		String createComment = commentService.createComment(uid, pid, commentDto);
 		String message = "Message";
 		Map<String, String> response = new HashMap<>();
 		response.put(message, createComment);

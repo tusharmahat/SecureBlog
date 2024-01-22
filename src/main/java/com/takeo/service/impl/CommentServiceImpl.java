@@ -29,11 +29,13 @@ public class CommentServiceImpl implements CommentService {
 	private PostRepo postDaoImpl;
 
 	@Override
-	public String createComment(Long uid, Long pid, Comment comment) {
+	public String createComment(Long uid, Long pid, CommentDto commentDto) {
 		String message = "Comment failed";
 		Optional<User> existingUser = userDaoImpl.findById(uid);
 		Optional<Post> existingPost = postDaoImpl.findById(pid);
 		if (existingUser.isPresent() && existingPost.isPresent()) {
+			Comment comment=new Comment();
+			BeanUtils.copyProperties(commentDto, comment);
 			comment.setUser(existingUser.get());
 			comment.setPost(existingPost.get());
 			Comment saveComment = commentDaoImpl.save(comment);

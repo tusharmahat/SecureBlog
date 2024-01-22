@@ -59,9 +59,9 @@ public class CategoryServiceImpl implements CategoryService {
 	public CategoryDto readCategory(Long categoryId) {
 		Optional<Category> readCategory = catDaoImpl.findById(categoryId);
 		if (readCategory.isPresent()) {
-			CategoryDto returnCategory = readCategory.get();
-			
-			return returnCategoryDto;
+//			CategoryDto returnCategory = readCategory.get();
+//			
+//			return returnCategoryDto;
 		}
 
 		throw new ResourceNotFoundException("category with "+categoryId+" not found");
@@ -82,7 +82,7 @@ public class CategoryServiceImpl implements CategoryService {
 			
 			CategoryDto catDto= new CategoryDto();
 			BeanUtils.copyProperties(saveCat, catDto);
-			return catDto;
+//			return catDto;
 		}
 		throw new ResourceNotFoundException("Category not found");
 	}

@@ -10,6 +10,8 @@ public interface PostService {
 
 	String create(PostDto post, Long uid);
 
+	List<PostDto> read();
+	
 	List<PostDto> read(Long uid);
 	
 	public PostDto readPost(Long pid);
