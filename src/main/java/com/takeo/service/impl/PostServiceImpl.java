@@ -18,9 +18,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.takeo.dto.PostDto;
+import com.takeo.entity.Category;
 import com.takeo.entity.Post;
 import com.takeo.entity.User;
 import com.takeo.exceptions.ResourceNotFoundException;
+import com.takeo.repo.CategoryRepo;
 import com.takeo.repo.PostRepo;
 import com.takeo.repo.UserRepo;
 import com.takeo.service.PostService;
@@ -29,7 +31,7 @@ import com.takeo.utils.ImageNameGenerator;
 
 @Service
 public class PostServiceImpl implements PostService {
-	//private final String DB_PATH = "/Users/tusharmahat/db/";
+	// private final String DB_PATH = "/Users/tusharmahat/db/";
 	private final String DB_PATH = "C:\\Users\\himal\\OneDrive\\Desktop\\db\\";
 
 	@Autowired
@@ -45,24 +47,38 @@ public class PostServiceImpl implements PostService {
 	private UserRepo userDaoImpl;
 
 	@Autowired
+	private CategoryRepo categoryDaoImpl;
+
+	@Autowired
 	private ImageNameGenerator fileNameGenerator;
 
 	@Override
-	public String create(PostDto postDto, Long uid) {
-		Optional<User> existingUser = userDaoImpl.findById(uid);
+	public String create(PostDto postDto, Long uid, Long catId) {
+		User user = userDaoImpl.findById(uid)
+				.orElseThrow(() -> new ResourceNotFoundException("User with id " + uid + " not found"));
+		Category cat = categoryDaoImpl.findById(catId)
+				.orElseThrow(() -> new ResourceNotFoundException("Category with id " + catId + " not found"));
+
 		String message = "Post not created";
-		if (existingUser.isPresent()) {
-			User user = existingUser.get();
-			Post post = new Post();
-			BeanUtils.copyProperties(postDto, post);
-			post.setUser(user);
-			Post savePost = postDaoImpl.save(post);
-			if (savePost != null) {
-				message = "Post  created";
-			}
-			return message;
+		Post post = new Post();
+		BeanUtils.copyProperties(postDto, post);
+
+		// Setting the user for the post
+		post.setUser(user);
+
+		// Adding the category to the post
+		post.getCategories().add(cat);
+
+		cat.getCat_posts().add(post);
+
+		Post savedPost = postDaoImpl.save(post);
+
+		if (savedPost != null) {
+			message = "Post created, in category: " + cat.getCategoryTitle();
+		} else {
+			message = "Failed to create post.";
 		}
-		throw new ResourceNotFoundException("User with uid " + uid + " not found");
+		return message;
 	}
 
 	@Override
@@ -82,115 +98,101 @@ public class PostServiceImpl implements PostService {
 
 	@Override
 	public List<PostDto> read(Long uid) {
-		Optional<User> existingUser = userDaoImpl.findById(uid);
-		if (existingUser.isPresent()) {
-			User user = existingUser.get();
-			List<Post> posts = postDaoImpl.findByUser(user);
-			List<PostDto> postsDto = new ArrayList<>();
-			if (posts.size() != 0) {
-				for (Post p : posts) {
-					PostDto postDto = new PostDto();
-					BeanUtils.copyProperties(p, postDto);
-					postsDto.add(postDto);
-				}
-				return postsDto;
-			}
-			throw new ResourceNotFoundException("User with uid " + uid + " has not posts");
-		}
-		throw new ResourceNotFoundException("User with uid " + uid + " does not exist");
+		User user = new User();
+		user.setUId(uid);
+		List<Post> posts = postDaoImpl.findByUser(user);
 
+		if (posts.size() != 0) {
+			List<PostDto> postsDto = new ArrayList<>();
+			for (Post p : posts) {
+				PostDto postDto = new PostDto();
+				BeanUtils.copyProperties(p, postDto);
+				postsDto.add(postDto);
+			}
+			return postsDto;
+		}
+		throw new ResourceNotFoundException("User with uid " + uid + " has no posts");
 	}
 
 	@Override
 	public PostDto readPost(Long pid) {
-		Optional<Post> post = postDaoImpl.findById(pid);
-		if (post.isPresent()) {
-			Post returnPost = post.get();
-			PostDto postDto = new PostDto();
-			BeanUtils.copyProperties(returnPost, postDto);
-			return postDto;
-		}
-		throw new ResourceNotFoundException("Post with " + pid + " not found");
+		Post post = postDaoImpl.findById(pid)
+				.orElseThrow(() -> new ResourceNotFoundException("Post with " + pid + " not found"));
+		PostDto postDto = new PostDto();
+		BeanUtils.copyProperties(post, postDto);
+		return postDto;
 	}
 
 	@Override
 	public String update(PostDto postDto, Long uid, Long pid) {
 		// TODO Auto-generated method stub
 		String message = "Not updated";
-		Optional<Post> existingPost = postDaoImpl.findById(pid);
-		if (existingPost.isPresent()) {
-			if (existingPost.get().getUser().getUId() == uid) {
-				postDto.setPid(existingPost.get().getPid());
-				Post post = existingPost.get();
-				modelMapper.map(postDto, post);
+		Post existingPost = postDaoImpl.findById(pid)
+				.orElseThrow(() -> new ResourceNotFoundException("Post with " + pid + " not found"));
 
-				Post savePost = postDaoImpl.save(post);
-				if (savePost != null) {
-					message = "Post updated";
-				}
+		if (existingPost.getUser().getUId() == uid) {
+			postDto.setPid(existingPost.getPid());
+			modelMapper.map(postDto, existingPost);
+
+			Post savePost = postDaoImpl.save(existingPost);
+			if (savePost != null) {
+				message = "Post updated";
 			}
-			return message;
 		}
-
-		throw new ResourceNotFoundException("Update failed");
+		return message;
 	}
 
 	@Override
 	public String delete(Long pid) {
 		String message = "Post not deleted";
-		Optional<Post> existingPost = postDaoImpl.findById(pid);
-		if (existingPost.isPresent()) {
-			postDaoImpl.deleteById(pid);
-			message = "Post deleted";
-			return message;
-		}
-		throw new ResourceNotFoundException("Post with " + pid + " not found");
+		postDaoImpl.findById(pid).orElseThrow(() -> new ResourceNotFoundException("Post with " + pid + " not found"));
+
+		postDaoImpl.deleteById(pid);
+		message = "Post deleted";
+		return message;
 	}
 
 	@Override
 	public byte[] viewPostPicture(Long pid) {
-		Optional<Post> post = postDaoImpl.findById(pid);
-		if (post.isPresent()) {
-			String filePath = post.get().getImage();
-			try {
-				return Files.readAllBytes(Paths.get(filePath));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		Post post = postDaoImpl.findById(pid)
+				.orElseThrow(() -> new ResourceNotFoundException("Post with " + pid + " not found"));
+
+		String filePath = post.getImage();
+		try {
+			return Files.readAllBytes(Paths.get(filePath));
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		throw new ResourceNotFoundException("Post  not found with post id: " + pid);
+
+		throw new ResourceNotFoundException("No picture found for post id: " + pid);
 	}
 
 	@Override
 	public String updatePostPicture(@RequestParam("file") MultipartFile file, Long pid) {
-		// TODO Auto-generated method stub
-		Optional<Post> existingPost = postDaoImpl.findById(pid);
-		if (existingPost.isPresent()) {
-			Post post = existingPost.get();
-			String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmSSS"));
-			String fileName = timeStamp + fileNameGenerator.getFileExtensionName(file.getOriginalFilename());
-			String filePath = DB_PATH + fileName;
+		Post existingPost = postDaoImpl.findById(pid)
+				.orElseThrow(() -> new ResourceNotFoundException("Post with " + pid + " not found"));
 
-			if (imageFile.isImageFile(file)) {
-				// Create the folder if it doesnt exist
-				File folder = new File(filePath);
-				if (!folder.exists()) {
-					folder.mkdirs();
-				}
-				try {
-					file.transferTo(new File(filePath));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				post.setImage(filePath);
-				Post updatePhoto = postDaoImpl.save(post);
-				if (updatePhoto != null) {
-					return "Updated";
-				}
-			} else {
-				return ("Only image files are allowed.");
+		String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmSSS"));
+		String fileName = timeStamp + fileNameGenerator.getFileExtensionName(file.getOriginalFilename());
+		String filePath = DB_PATH + fileName;
+
+		if (imageFile.isImageFile(file)) {
+			// Create the folder if it doesnt exist
+			File folder = new File(filePath);
+			if (!folder.exists()) {
+				folder.mkdirs();
+			}
+			try {
+				file.transferTo(new File(filePath));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			existingPost.setImage(filePath);
+			Post updatePhoto = postDaoImpl.save(existingPost);
+			if (updatePhoto != null) {
+				return "Updated";
 			}
 		}
-		return null;
+		return ("Only image files are allowed.");
 	}
 }

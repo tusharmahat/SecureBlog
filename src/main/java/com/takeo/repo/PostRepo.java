@@ -12,5 +12,4 @@ import com.takeo.entity.User;
 @Repository
 public interface PostRepo extends JpaRepository<Post, Long> {
 	List<Post> findByUser(User user);
-
 }

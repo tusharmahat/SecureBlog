@@ -2,7 +2,6 @@ package com.takeo.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
@@ -13,7 +12,6 @@ import com.takeo.dto.CategoryDto;
 import com.takeo.entity.Category;
 import com.takeo.exceptions.ResourceNotFoundException;
 import com.takeo.repo.CategoryRepo;
-import com.takeo.repo.PostRepo;
 import com.takeo.service.CategoryService;
 
 @Service
@@ -21,12 +19,9 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Autowired
 	private ModelMapper modelMapper;
-	
-	@Autowired
-	private CategoryRepo catDaoImpl;
 
 	@Autowired
-	private PostRepo postDaoImpl;
+	private CategoryRepo catDaoImpl;
 
 	@Override
 	public String create(CategoryDto category) {
@@ -39,7 +34,6 @@ public class CategoryServiceImpl implements CategoryService {
 			return message;
 		}
 		return message;
-
 	}
 
 	@Override
@@ -52,7 +46,6 @@ public class CategoryServiceImpl implements CategoryService {
 				CategoryDto catDto = new CategoryDto();
 				BeanUtils.copyProperties(c, catDto);
 				categoryDto.add(catDto);
-
 			}
 			return categoryDto;
 		}
@@ -61,50 +54,38 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Override
 	public CategoryDto readCategory(Long categoryId) {
-		Optional<Category> readCategory = catDaoImpl.findById(categoryId);
-		if (readCategory.isPresent()) {
-			Category returnCategory = readCategory.get();
-			CategoryDto catDto =new CategoryDto();
-			
-			BeanUtils.copyProperties(returnCategory, catDto);
-			
-			return catDto;
-		}
+		Category readCategory = catDaoImpl.findById(categoryId)
+				.orElseThrow(() -> new ResourceNotFoundException("Category with " + categoryId + " not found"));
 
-		throw new ResourceNotFoundException("category with "+categoryId+" not found");
+		CategoryDto catDto = new CategoryDto();
+
+		BeanUtils.copyProperties(readCategory, catDto);
+
+		return catDto;
 	}
 
 	@Override
 	public String update(CategoryDto category, Long categoryId) {
-		String message ="Not updated";
-		Optional<Category> existingCategory =catDaoImpl.findById(categoryId);
-		
-		if(existingCategory.isPresent())
-		{
-			Category cat = existingCategory.get();
-			
-			category.setCategoryId(cat.getCategoryId());
-			Category cate= existingCategory.get();
-			modelMapper.map(category, cate);
-			Category saveCat= catDaoImpl.save(cate);
-			return message="Updated";
+		String message = "Not updated";
+		Category existingCategory = catDaoImpl.findById(categoryId)
+				.orElseThrow(() -> new ResourceNotFoundException("Category not found with category id: " + categoryId));
+		category.setCategoryId(existingCategory.getCategoryId());
+		modelMapper.map(category, existingCategory);
+		Category saveCat = catDaoImpl.save(existingCategory);
+		if (saveCat != null) {
+			message = "Updated";
 		}
-		throw new ResourceNotFoundException("Category not found");
+		return message;
+
 	}
 
 	@Override
 	public String delete(Long categoryId) {
-		String message="Category not deleted";
-		Optional<Category> category = catDaoImpl.findById(categoryId);
-		
-		if(category.isPresent())
-		{
-			catDaoImpl.deleteById(categoryId);
-			message="Category deleted";
-			return message;
-		}
-		
-		throw new ResourceNotFoundException("Category not found with category id: "+ categoryId);
+		String message = "Category not deleted";
+		catDaoImpl.findById(categoryId)
+				.orElseThrow(() -> new ResourceNotFoundException("Category not found with category id: " + categoryId));
+		catDaoImpl.deleteById(categoryId);
+		message = "Category deleted";
+		return message;
 	}
-
 }

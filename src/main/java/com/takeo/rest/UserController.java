@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,19 +48,6 @@ public class UserController {
 		List<UserDto> users = userServiceImpl.read();
 
 		return ResponseEntity.ok().body(users);
-	}
-
-//	http://localhost:8080/blog/user/delete/{id}
-	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<String> deleteUser(@PathVariable("id") Long uid) {
-
-		boolean result = userServiceImpl.delete(uid);
-		String message = "Not deleted";
-		if (result) {
-			message = "Deleted";
-			return ResponseEntity.ok().body(message);
-		}
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
 	}
 
 //	http://localhost:8080/blog/user/update

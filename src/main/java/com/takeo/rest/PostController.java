@@ -31,13 +31,13 @@ public class PostController {
 	@Autowired
 	private PostServiceImpl postServiceImpl;
 
-//	http://localhost:8080/blog/post/create/{uid}
-	@PostMapping("/create/{uid}")
-	public ResponseEntity<Map<String, String>> createPost(@PathVariable("uid") Long uid,
+//	http://localhost:8080/blog/post/create/{uid}/{catId}
+	@PostMapping("/create/{uid}/{catId}")
+	public ResponseEntity<Map<String, String>> createPost(@PathVariable("uid") Long uid,@PathVariable("catId") Long catId,
 			@Valid @RequestBody PostDto postDto) {
 
 		String message = "Message";
-		String postSave = postServiceImpl.create(postDto, uid);
+		String postSave = postServiceImpl.create(postDto, uid,catId);
 
 		Map<String, String> response = new HashMap<>();
 

@@ -49,27 +49,24 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public String register(UserDto userDto) {
-		Optional<User> existingUser = daoImpl.findByEmail(userDto.getEmail());
+		daoImpl.findByEmail(userDto.getEmail())
+				.orElseThrow(() -> new DuplicateItemException("User with same email already registered."));
 		String message = "Registration failed";
-		if (existingUser.isEmpty()) {
-			// create a otp
-			String otp = OtpGenerator.generate();
+		// create a otp
+		String otp = OtpGenerator.generate();
 
-			// send otp
-			emailService.sendMail(userDto.getEmail(), "OTP", "Your OTP is " + otp);
-			
-			User user=new User();
-			BeanUtils.copyProperties(userDto, user);
-			// save the otp for the user
-			user.setOtp(otp);
-			message = "Registration Success";
-			// save the user
-			User saveUser = daoImpl.save(user);
-			if (saveUser != null) {
-				message = "OTP sent to respected email address";
-			}
-		} else {
-			throw new DuplicateItemException("User with same email already registered.");
+		// send otp
+		emailService.sendMail(userDto.getEmail(), "OTP", "Your OTP is " + otp);
+
+		User user = new User();
+		BeanUtils.copyProperties(userDto, user);
+		// save the otp for the user
+		user.setOtp(otp);
+		message = "Registration Success";
+		// save the user
+		User saveUser = daoImpl.save(user);
+		if (saveUser != null) {
+			message = "OTP sent to respected email address";
 		}
 		return message;
 	}
@@ -92,146 +89,126 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public String update(UserDto user) {
-		Optional<User> existingUser = daoImpl.findByEmail(user.getEmail());
+		User existingUser = daoImpl.findByEmail(user.getEmail())
+				.orElseThrow(() -> new DuplicateItemException("User not found."));
 		String message = "User not updated";
-		if (existingUser.isPresent()) {
-			User u = existingUser.get();
 
-			user.setUId(u.getUId());
-			BeanUtils.copyProperties(user, u);
-			User saveUser = daoImpl.save(u);
-			if (saveUser != null) {
-				message = "User updated";
-			}
-			return message;
+		user.setUId(existingUser.getUId());
+		BeanUtils.copyProperties(user, existingUser);
+		User saveUser = daoImpl.save(existingUser);
+		if (saveUser != null) {
+			message = "User updated";
 		}
-		throw new ResourceNotFoundException("User not found");// exception
+		return message;
 	}
 
 	@Override
 	public String verifyOtp(String otp) {
-		Optional<User> existingUser = daoImpl.findByOtp(otp);
+		User existingUser = daoImpl.findByOtp(otp).orElseThrow(() -> new DuplicateItemException("User not found."));
 		String message = "OTP did not match";
-		if (existingUser.isPresent()) {
-			User user = existingUser.get();
-			if (otp.equals(user.getOtp())) {
-				String randomPassword = PasswordGenerator.generateRandomPassword();
-				user.setPassword(randomPassword);
-				user.setOtp("");
-				user.setRoleId(2l);
-				User saveUser = daoImpl.save(user);
-				if (saveUser != null) {
-					emailService.sendMail(user.getEmail(), "Password", "Your password is " + randomPassword);
-					message = "OTP verified, password sent to email";
-				}
+
+		if (otp.equals(existingUser.getOtp())) {
+			String randomPassword = PasswordGenerator.generateRandomPassword();
+			existingUser.setPassword(randomPassword);
+			existingUser.setOtp("");
+			existingUser.setRoleId(2l);
+			User saveUser = daoImpl.save(existingUser);
+			if (saveUser != null) {
+				emailService.sendMail(existingUser.getEmail(), "Password", "Your password is " + randomPassword);
+				message = "OTP verified, password sent to email";
 			}
-			return message;
 		}
-		throw new ResourceNotFoundException("User not found");
+		return message;
 	}
 
 	@Override
 	public String userLogin(String email, String password) {
-		Optional<User> existingUser = daoImpl.findByEmail(email);
-		if (existingUser.isPresent()) {
-			User user = existingUser.get();
-			if (user.getPassword() != null) {
-				if (user.getPassword().equals(password)) {
-					return "Logged in";
-				} else {
-					throw new PasswordMismatchException("Password did not match");
-				}
+		User existingUser = daoImpl.findByEmail(email)
+				.orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+		if (existingUser.getPassword() != null) {
+			if (existingUser.getPassword().equals(password)) {
+				return "Logged in";
+			} else {
+				throw new PasswordMismatchException("Password did not match");
 			}
-			return "OTP not verified";
 		}
-		throw new ResourceNotFoundException("User not found with email: " + email);
+		return "OTP not verified";
 	}
 
 	@Override
 	public String forgotPassword(String email) {
-		Optional<User> user = daoImpl.findByEmail(email);
+		User user = daoImpl.findByEmail(email)
+				.orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
 		String message = "Failed to change password";
-		if (!user.isEmpty()) {
-			User existingUser = user.get();
-			String randomPassword = PasswordGenerator.generateRandomPassword();
-			existingUser.setPassword(randomPassword);
-			User saveUser = daoImpl.save(existingUser);
-			if (saveUser != null) {
-				emailService.sendMail(existingUser.getEmail(), "Password", "Your password is " + randomPassword);
-				message = "New password sent to respective email";
-			}
-			return message;
+
+		String randomPassword = PasswordGenerator.generateRandomPassword();
+		user.setPassword(randomPassword);
+		User saveUser = daoImpl.save(user);
+		if (saveUser != null) {
+			emailService.sendMail(user.getEmail(), "Password", "Your password is " + randomPassword);
+			message = "New password sent to respective email";
 		}
-		throw new ResourceNotFoundException("User not found with email: " + email);
+		return message;
 	}
 
 	@Override
 	public String updateProfilePicture(MultipartFile file, String email) {
-		Optional<User> existingUser = daoImpl.findByEmail(email);
-		if (!existingUser.isEmpty()) {
-			User user = existingUser.get();
-			String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
-			String fileName = timestamp + fileNameGenerator.getFileExtensionName(file.getOriginalFilename());
-			String filePath = DB_PATH + fileName;
+		User existingUser = daoImpl.findByEmail(email)
+				.orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
 
-			if (imageFile.isImageFile(file)) {
-				// Create the folder if it doesn't exist
-				File folder = new File(filePath);
-				if (!folder.exists()) {
-					folder.mkdirs();
-				}
-				try {
-					file.transferTo(new File(filePath));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				user.setImage(filePath);
-				User updatePhoto = daoImpl.save(user);
-				if (updatePhoto != null) {
-					return "successfull";
-				}
-			} else {
-				throw new InvalidFileExtensionException("Only image files are allowed.");
+		String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
+		String fileName = timestamp + fileNameGenerator.getFileExtensionName(file.getOriginalFilename());
+		String filePath = DB_PATH + fileName;
+
+		if (imageFile.isImageFile(file)) {
+			// Create the folder if it doesn't exist
+			File folder = new File(filePath);
+			if (!folder.exists()) {
+				folder.mkdirs();
+			}
+			try {
+				file.transferTo(new File(filePath));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			existingUser.setImage(filePath);
+			User updatePhoto = daoImpl.save(existingUser);
+			if (updatePhoto != null) {
+				return "Profile Picture uploaded";
 			}
 		}
-		throw new ResourceNotFoundException("User not found with email: " + email);
+		throw new InvalidFileExtensionException("Only image files are allowed.");
 	}
 
 	@Override
 	public byte[] viewProfilePicture(String email) {
-		Optional<User> user = daoImpl.findByEmail(email);
-		if (user.isPresent()) {
-			String filePath = user.get().getImage();
-			if (filePath != null) {
-				try {
-					return Files.readAllBytes(Paths.get(filePath));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			} else {
-				throw new ResourceNotFoundException("Profile picture not found for the user with email: " + email);
+		User user = daoImpl.findByEmail(email)
+				.orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+
+		String filePath = user.getImage();
+		if (filePath != null) {
+			try {
+				return Files.readAllBytes(Paths.get(filePath));
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
-		throw new ResourceNotFoundException("User not found with email: " + email);
+		throw new ResourceNotFoundException("Profile picture not found for the user with email: " + email);
 	}
 
 	@Override
 	public String changePassword(ResetPasswordDto resetPassDto) {
-		Optional<User> user = daoImpl.findByEmail(resetPassDto.getEmail());
-		if (user != null) {
-			if (resetPassDto.getPassword().equals(resetPassDto.getConfirmPassword())) {
-				User userObject = user.get();
-				userObject.setPassword(resetPassDto.getConfirmPassword());
+		User user = daoImpl.findByEmail(resetPassDto.getEmail()).orElseThrow(
+				() -> new ResourceNotFoundException("User not found with email: " + resetPassDto.getEmail()));
+		if (resetPassDto.getPassword().equals(resetPassDto.getConfirmPassword())) {
 
-				User saveUser = daoImpl.save(userObject);
-				if (saveUser != null) {
-					return "Password updated";
-				}
-			} else {
-				throw new PasswordMismatchException("Password mismatch");
+			user.setPassword(resetPassDto.getConfirmPassword());
+
+			User saveUser = daoImpl.save(user);
+			if (saveUser != null) {
+				return "Password updated";
 			}
 		}
-		throw new ResourceNotFoundException("User not found with email: " + resetPassDto.getEmail());
+		throw new PasswordMismatchException("Password mismatch");
 	}
-
 }
