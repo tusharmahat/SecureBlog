@@ -75,12 +75,12 @@ public class PostController {
 //	http://localhost:8080/blog/post/delete/{id}
 	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<Map<String, String>> deletePost(@PathVariable("id") long pid) {
-		String updatePicture = postServiceImpl.delete(pid);
+		String deletePost = postServiceImpl.delete(pid);
 		String message = "Message";
 
 		Map<String, String> response = new HashMap<>();
 
-		response.put(message, updatePicture);
+		response.put(message, deletePost);
 
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,9 @@ import com.takeo.service.CategoryService;
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
+	@Autowired
+	private ModelMapper modelMapper;
+	
 	@Autowired
 	private CategoryRepo catDaoImpl;
 
@@ -59,9 +63,12 @@ public class CategoryServiceImpl implements CategoryService {
 	public CategoryDto readCategory(Long categoryId) {
 		Optional<Category> readCategory = catDaoImpl.findById(categoryId);
 		if (readCategory.isPresent()) {
-			CategoryDto returnCategory = readCategory.get();
+			Category returnCategory = readCategory.get();
+			CategoryDto catDto =new CategoryDto();
 			
-			return returnCategoryDto;
+			BeanUtils.copyProperties(returnCategory, catDto);
+			
+			return catDto;
 		}
 
 		throw new ResourceNotFoundException("category with "+categoryId+" not found");
@@ -70,19 +77,20 @@ public class CategoryServiceImpl implements CategoryService {
 	@Override
 	public String update(CategoryDto category, Long categoryId) {
 		// TODO Auto-generated method stub
-		Optional<Category> existingCategory =catDaoImpl.findById(category.getCategoryId());
+		String message ="Not updated";
+		Optional<Category> existingCategory =catDaoImpl.findById(categoryId);
 		
 		if(existingCategory.isPresent())
 		{
-			Category c = existingCategory.get();
+			Category cat = existingCategory.get();
 			
-			category.setCategoryId(c.getCategoryId());
-			BeanUtils.copyProperties(category, c);
-			Category saveCat= catDaoImpl.save(c);
+			category.setCategoryId(cat.getCategoryId());
+			Category cate= existingCategory.get();
+			modelMapper.map(category, cate);
+			Category saveCat= catDaoImpl.save(cate);
 			
-			CategoryDto catDto= new CategoryDto();
-			BeanUtils.copyProperties(saveCat, catDto);
-			return catDto;
+			
+			return message="Updated";
 		}
 		throw new ResourceNotFoundException("Category not found");
 	}
@@ -90,7 +98,17 @@ public class CategoryServiceImpl implements CategoryService {
 	@Override
 	public String delete(Long categoryId) {
 		// TODO Auto-generated method stub
-		return null;
+		String message="Category not deleted";
+		Optional<Category> category = catDaoImpl.findById(categoryId);
+		
+		if(category.isPresent())
+		{
+			catDaoImpl.deleteById(categoryId);
+			message="Category deleted";
+			return message;
+		}
+		
+		throw new ResourceNotFoundException("Category not found with category id: "+ categoryId);
 	}
 
 }
