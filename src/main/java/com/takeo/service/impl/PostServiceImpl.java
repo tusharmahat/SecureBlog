@@ -8,11 +8,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -194,5 +195,17 @@ public class PostServiceImpl implements PostService {
 			}
 		}
 		return ("Only image files are allowed.");
+	}
+
+	@Override
+	public Page<PostDto> readCatPost(String category, Pageable pageable) {
+		categoryDaoImpl.findByCategoryTitle(category)
+				.orElseThrow(() -> new ResourceNotFoundException("Category " + category + " not found"));
+		Page<Post> posts = postDaoImpl.findByCategoryTitle(category, pageable);
+        return posts.map(post -> {
+            PostDto postDto = new PostDto();
+            BeanUtils.copyProperties(post, postDto);
+            return postDto;
+        });
 	}
 }

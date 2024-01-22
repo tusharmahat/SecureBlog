@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -63,6 +65,14 @@ public class PostController {
 		Map<String, List<PostDto>> response = new HashMap<>();
 		response.put(message, posts);
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
+	}
+	
+	// http://localhost:8080/blog/post/getbycategory?cat=Historic&page=0&size=10
+	@GetMapping("/getbycategory")
+	public ResponseEntity<?> getByCat(@RequestParam(name="cat") String cat,Pageable pageable) {
+		Page<PostDto> category = postServiceImpl.readCatPost(cat,pageable);
+
+		return new ResponseEntity<>(category, HttpStatus.CREATED);
 	}
 
 //	http://localhost:8080/blog/posts/get/{id}

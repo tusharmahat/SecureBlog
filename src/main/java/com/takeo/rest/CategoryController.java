@@ -75,6 +75,7 @@ public class CategoryController {
 		response.put(message, existingCategory);
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
+
 //	http://localhost:8080/blog/category/delete/{cid}
 	@DeleteMapping("/delete/{cid}")
 	public ResponseEntity<Map<String, String>> deleteCategory(@PathVariable("cid") long categoryId) {
