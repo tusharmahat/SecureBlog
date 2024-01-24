@@ -10,9 +10,5 @@ public class CategoryDto {
 	private long categoryId;
 
 	@NotBlank
-	private String categoryTitle;
-
-	@NotBlank
-	private String categoryDiscription;
-
+	private String categoryName;
 }

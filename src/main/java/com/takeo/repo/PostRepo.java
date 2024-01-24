@@ -16,6 +16,6 @@ import com.takeo.entity.User;
 public interface PostRepo extends JpaRepository<Post, Long> {
 	List<Post> findByUser(User user);
 
-	@Query("SELECT DISTINCT p FROM Post p JOIN p.categories c WHERE c.categoryTitle = :categoryTitle")
-	Page<Post> findByCategoryTitle(@Param("categoryTitle") String categoryTitle,Pageable pageable);
+	@Query("SELECT DISTINCT p FROM Post p JOIN p.categories c WHERE c.categoryName = :categoryName")
+	Page<Post> findByCategoryName(@Param("categoryName") String categoryName,Pageable pageable);
 }

@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
@@ -54,12 +55,17 @@ public class PostServiceImpl implements PostService {
 	private ImageNameGenerator fileNameGenerator;
 
 	@Override
-	public String create(PostDto postDto, Long uid, Long catId) {
+	public String create(PostDto postDto, Long uid, String catName) {
 		User user = userDaoImpl.findById(uid)
 				.orElseThrow(() -> new ResourceNotFoundException("User with id " + uid + " not found"));
-		Category cat = categoryDaoImpl.findById(catId)
-				.orElseThrow(() -> new ResourceNotFoundException("Category with id " + catId + " not found"));
-
+		Optional<Category> cat = categoryDaoImpl.findByCategoryName(catName);
+		Category category;
+		if(cat.isEmpty()) {
+			 category=new Category();
+			 category.setCategoryName(catName);
+		}else {
+			category=cat.get();
+		}
 		String message = "Post not created";
 		Post post = new Post();
 		BeanUtils.copyProperties(postDto, post);
@@ -68,14 +74,14 @@ public class PostServiceImpl implements PostService {
 		post.setUser(user);
 
 		// Adding the category to the post
-		post.getCategories().add(cat);
+		post.getCategories().add(category);
 
-		cat.getCategoriesPosts().add(post);
+		category.getCategoriesPosts().add(post);
 
 		Post savedPost = postDaoImpl.save(post);
 
 		if (savedPost != null) {
-			message = "Post created, in category: " + cat.getCategoryTitle();
+			message = "Post created, in category: " + category.getCategoryName();
 		} else {
 			message = "Failed to create post.";
 		}
@@ -199,9 +205,9 @@ public class PostServiceImpl implements PostService {
 
 	@Override
 	public Page<PostDto> readCatPost(String category, Pageable pageable) {
-		categoryDaoImpl.findByCategoryTitle(category)
+		categoryDaoImpl.findByCategoryName(category)
 				.orElseThrow(() -> new ResourceNotFoundException("Category " + category + " not found"));
-		Page<Post> posts = postDaoImpl.findByCategoryTitle(category, pageable);
+		Page<Post> posts = postDaoImpl.findByCategoryName(category, pageable);
         return posts.map(post -> {
             PostDto postDto = new PostDto();
             BeanUtils.copyProperties(post, postDto);

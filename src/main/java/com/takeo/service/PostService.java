@@ -10,7 +10,7 @@ import com.takeo.dto.PostDto;
 
 public interface PostService {
 
-	String create(PostDto post, Long uid, Long catId);
+	String create(PostDto post, Long uid, String catName);
 
 	List<PostDto> read();
 

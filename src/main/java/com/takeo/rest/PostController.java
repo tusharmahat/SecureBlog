@@ -35,11 +35,11 @@ public class PostController {
 
 //	http://localhost:8080/blog/post/create/{uid}/{catId}
 	@PostMapping("/create/{uid}/{catId}")
-	public ResponseEntity<Map<String, String>> createPost(@PathVariable("uid") Long uid,@PathVariable("catId") Long catId,
+	public ResponseEntity<Map<String, String>> createPost(@PathVariable("uid") Long uid,@PathVariable("catId") String catName,
 			@Valid @RequestBody PostDto postDto) {
 
 		String message = "Message";
-		String postSave = postServiceImpl.create(postDto, uid,catId);
+		String postSave = postServiceImpl.create(postDto, uid,catName);
 
 		Map<String, String> response = new HashMap<>();
 
