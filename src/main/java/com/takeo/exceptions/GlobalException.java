@@ -33,21 +33,21 @@ public class GlobalException extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(InvalidEmailException.class)
 	protected ResponseEntity<ApiResponse> invalidEmailException(InvalidEmailException e) {
-		ApiResponse res = ApiResponse.builder().message(e.getMessage()).status(HttpStatus.NOT_FOUND)
+		ApiResponse res = ApiResponse.builder().message(e.getMessage()).status(HttpStatus.BAD_REQUEST)
 				.timestamp(new Date()).build();
 		return new ResponseEntity<>(res, HttpStatus.NOT_FOUND);
 	}
 
 	@ExceptionHandler(InvalidPasswordException.class)
 	protected ResponseEntity<ApiResponse> invalidPasswordException(InvalidPasswordException e) {
-		ApiResponse res = ApiResponse.builder().message(e.getMessage()).status(HttpStatus.NOT_FOUND)
+		ApiResponse res = ApiResponse.builder().message(e.getMessage()).status(HttpStatus.BAD_REQUEST)
 				.timestamp(new Date()).build();
 		return new ResponseEntity<>(res, HttpStatus.NOT_FOUND);
 	}
 
 	@ExceptionHandler(PasswordMismatchException.class)
 	protected ResponseEntity<ApiResponse> passwordMismatchException(PasswordMismatchException e) {
-		ApiResponse res = ApiResponse.builder().message(e.getMessage()).status(HttpStatus.NOT_FOUND)
+		ApiResponse res = ApiResponse.builder().message(e.getMessage()).status(HttpStatus.BAD_REQUEST)
 				.timestamp(new Date()).build();
 		return new ResponseEntity<>(res, HttpStatus.NOT_FOUND);
 	}
@@ -61,13 +61,13 @@ public class GlobalException extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(DuplicateItemException.class)
 	protected ResponseEntity<ApiResponse> duplicateItemException(DuplicateItemException e) {
-		ApiResponse res = ApiResponse.builder().message(e.getMessage()).status(HttpStatus.NOT_FOUND)
+		ApiResponse res = ApiResponse.builder().message(e.getMessage()).status(HttpStatus.CONFLICT)
 				.timestamp(new Date()).build();
 		return new ResponseEntity<>(res, HttpStatus.NOT_FOUND);
 	}
 	@ExceptionHandler(InvalidFileExtensionException.class)
 	protected ResponseEntity<ApiResponse> invalidFileExtensionException(InvalidFileExtensionException e) {
-		ApiResponse res = ApiResponse.builder().message(e.getMessage()).status(HttpStatus.NOT_FOUND)
+		ApiResponse res = ApiResponse.builder().message(e.getMessage()).status(HttpStatus.BAD_REQUEST)
 				.timestamp(new Date()).build();
 		return new ResponseEntity<>(res, HttpStatus.NOT_FOUND);
 	}
