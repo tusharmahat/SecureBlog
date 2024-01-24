@@ -12,6 +12,7 @@ import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,6 +39,9 @@ public class UserServiceImpl implements UserService {
 
 	private final String DB_PATH = "/Users/tusharmahat/db/";
 //	private final String DB_PATH ="C:\\Users\\himal\\OneDrive\\Desktop\\db\\";
+//	@Autowired
+//	SecurityConfig secConfig;
+
 	@Autowired
 	private UserRepo daoImpl;
 
@@ -135,7 +139,7 @@ public class UserServiceImpl implements UserService {
 
 		if (otp.equals(existingUser.getOtp())) {
 			String randomPassword = PasswordGenerator.generateRandomPassword();
-			existingUser.setPassword(randomPassword);
+			existingUser.setPassword((randomPassword));
 			existingUser.setOtp("");
 			User saveUser = daoImpl.save(existingUser);
 			if (saveUser != null) {

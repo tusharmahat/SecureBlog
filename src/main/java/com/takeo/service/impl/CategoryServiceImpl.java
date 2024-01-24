@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.takeo.dto.CategoryDto;
 import com.takeo.entity.Category;
+import com.takeo.exceptions.DuplicateItemException;
 import com.takeo.exceptions.ResourceNotFoundException;
 import com.takeo.repo.CategoryRepo;
 import com.takeo.service.CategoryService;
@@ -24,9 +25,12 @@ public class CategoryServiceImpl implements CategoryService {
 	private CategoryRepo catDaoImpl;
 
 	@Override
-	public String create(CategoryDto category) {
+	public String create(CategoryDto categoryDto) {
+		if (catDaoImpl.findByCategoryName(categoryDto.getCategoryName()).isPresent()) {
+			throw new DuplicateItemException("The category " + categoryDto.getCategoryName() + " already exists");
+		}
 		Category cat = new Category();
-		BeanUtils.copyProperties(category, cat);
+		BeanUtils.copyProperties(categoryDto, cat);
 		Category saveCategory = catDaoImpl.save(cat);
 		String message = "Cannot Create Category";
 		if (saveCategory != null) {
