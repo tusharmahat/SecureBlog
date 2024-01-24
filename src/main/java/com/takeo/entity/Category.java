@@ -32,10 +32,9 @@ public class Category {
 
 	@ManyToMany
 	@JoinTable(
-	    name = "cat_posts",
+	    name = "categoriesPosts",
 	    joinColumns = @JoinColumn(name = "cat_id", referencedColumnName = "catId"),
 	    inverseJoinColumns = @JoinColumn(name = "p_id", referencedColumnName = "pid")
 	)
-	List<Post> cat_posts = new ArrayList<>();
-
+	List<Post> categoriesPosts = new ArrayList<>();
 }

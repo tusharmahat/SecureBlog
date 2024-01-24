@@ -28,6 +28,4 @@ public class UserDto {
 	private String gender;
 
 	private String image;
-
-	private long roleId;
 }

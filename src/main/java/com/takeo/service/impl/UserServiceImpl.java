@@ -8,6 +8,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import javax.annotation.PostConstruct;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +19,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.takeo.dto.ResetPasswordDto;
 import com.takeo.dto.UserDto;
+import com.takeo.entity.Role;
 import com.takeo.entity.User;
 import com.takeo.exceptions.DuplicateItemException;
 import com.takeo.exceptions.InvalidFileExtensionException;
 import com.takeo.exceptions.PasswordMismatchException;
 import com.takeo.exceptions.ResourceNotFoundException;
+import com.takeo.repo.RoleRepo;
 import com.takeo.repo.UserRepo;
 import com.takeo.service.UserService;
 import com.takeo.utils.EmailService;
@@ -41,31 +46,84 @@ public class UserServiceImpl implements UserService {
 	private EmailService emailService;
 
 	@Autowired
+	private RoleRepo roleDaoImpl;
+
+	@Autowired
 	private ImageFile imageFile;
 
 	@Autowired
 	private ImageNameGenerator fileNameGenerator;
 
+	@PostConstruct
+	public void init() {
+		initializeDefaultUsers();
+	}
+
+	private void initializeDefaultUsers() {
+		createUserIfNotExists();
+	}
+
+	private void createUserIfNotExists() {
+		Optional<User> existingAdmin = daoImpl.findByEmail("silencenature123@gmail.com");
+		if (existingAdmin.isEmpty()) {
+			User newAdmin = new User();
+			newAdmin.setEmail("silencenature123@gmail.com");
+			newAdmin.setName("Tushar Mahat");
+			Role role = roleDaoImpl.findByRole("Admin").orElseThrow(
+					() -> new ResourceNotFoundException("Default roles initializer not working, roles not found"));
+			role.getRolesUsers().add(newAdmin);
+			// create a otp
+			String otp = OtpGenerator.generate();
+			try {
+				// Send OTP via email
+				emailService.sendMail(newAdmin.getEmail(), "OTP", "Your OTP is " + otp);
+			} catch (Exception e) {
+				// Handle email sending failure (log or provide a user-friendly message)
+				System.out.println("Failed to send OTP. Please try again.");
+			}
+			// Save the OTP for the user
+			newAdmin.setOtp(otp);
+			newAdmin.getRoles().add(role);
+			daoImpl.save(newAdmin);
+		}
+	}
+
 	@Override
 	public String register(UserDto userDto) {
-		daoImpl.findByEmail(userDto.getEmail())
-				.orElseThrow(() -> new DuplicateItemException("User with same email already registered."));
+		Optional<User> existingUser = daoImpl.findByEmail(userDto.getEmail());
+
 		String message = "Registration failed";
-		// create a otp
-		String otp = OtpGenerator.generate();
+		if (existingUser.isPresent()) {
+			throw new DuplicateItemException("User with same email already registered.");
+		} else {
+			// create a otp
+			String otp = OtpGenerator.generate();
 
-		// send otp
-		emailService.sendMail(userDto.getEmail(), "OTP", "Your OTP is " + otp);
+			try {
+				// Send OTP via email
+				emailService.sendMail(userDto.getEmail(), "OTP", "Your OTP is " + otp);
+			} catch (Exception e) {
+				// Handle email sending failure (log or provide a user-friendly message)
+				return "Failed to send OTP. Please try again.";
+			}
 
-		User user = new User();
-		BeanUtils.copyProperties(userDto, user);
-		// save the otp for the user
-		user.setOtp(otp);
-		message = "Registration Success";
-		// save the user
-		User saveUser = daoImpl.save(user);
-		if (saveUser != null) {
-			message = "OTP sent to respected email address";
+			User user = new User();
+			BeanUtils.copyProperties(userDto, user);
+
+			Role role = roleDaoImpl.findByRole("User").orElseThrow(
+					() -> new ResourceNotFoundException("Default roles initializer not working, roles not found"));
+
+			role.getRolesUsers().add(user);
+			user.getRoles().add(role);
+
+			// Save the OTP for the user
+			user.setOtp(otp);
+
+			// Save the user
+			User saveUser = daoImpl.save(user);
+			if (saveUser != null) {
+				message = "OTP sent to the respective email address";
+			}
 		}
 		return message;
 	}
@@ -110,7 +168,6 @@ public class UserServiceImpl implements UserService {
 			String randomPassword = PasswordGenerator.generateRandomPassword();
 			existingUser.setPassword(randomPassword);
 			existingUser.setOtp("");
-			existingUser.setRoleId(2l);
 			User saveUser = daoImpl.save(existingUser);
 			if (saveUser != null) {
 				emailService.sendMail(existingUser.getEmail(), "Password", "Your password is " + randomPassword);

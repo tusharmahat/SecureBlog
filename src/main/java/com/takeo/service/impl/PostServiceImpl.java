@@ -70,7 +70,7 @@ public class PostServiceImpl implements PostService {
 		// Adding the category to the post
 		post.getCategories().add(cat);
 
-		cat.getCat_posts().add(post);
+		cat.getCategoriesPosts().add(post);
 
 		Post savedPost = postDaoImpl.save(post);
 

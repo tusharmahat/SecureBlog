@@ -54,7 +54,7 @@ public class PostController {
 		String message = "Posts:";
 		Map<String, List<PostDto>> response = new HashMap<>();
 		response.put(message, posts);
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 	// http://localhost:8080/blog/post/get
@@ -64,7 +64,7 @@ public class PostController {
 		String message = "Posts:";
 		Map<String, List<PostDto>> response = new HashMap<>();
 		response.put(message, posts);
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
 	// http://localhost:8080/blog/post/getbycategory?cat=Historic&page=0&size=10
@@ -72,7 +72,7 @@ public class PostController {
 	public ResponseEntity<?> getByCat(@RequestParam(name="cat") String cat,Pageable pageable) {
 		Page<PostDto> category = postServiceImpl.readCatPost(cat,pageable);
 
-		return new ResponseEntity<>(category, HttpStatus.CREATED);
+		return new ResponseEntity<>(category, HttpStatus.OK);
 	}
 
 //	http://localhost:8080/blog/posts/get/{id}
@@ -82,7 +82,7 @@ public class PostController {
 		String message = "Posts:";
 		Map<String, PostDto> response = new HashMap<>();
 		response.put(message, post);
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
   
 //	http://localhost:8080/blog/post/users/{uid}/update/{pid}
@@ -93,7 +93,7 @@ public class PostController {
 		String message = "Message";
 		Map<String, String> response = new HashMap<>();
 		response.put(message, existingPost);
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 

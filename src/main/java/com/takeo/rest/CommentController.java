@@ -44,7 +44,7 @@ public class CommentController {
 		String message = "Comments of pid=" + pid;
 		Map<String, List<CommentDto>> response = new HashMap<>();
 		response.put(message, getComments);
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 //	http://localhost:8080/blog/comment/getone/{cid}
 	@GetMapping("/getone/{cid}")
@@ -53,7 +53,7 @@ public class CommentController {
 		String message = "Comment";
 		Map<String, CommentDto> response = new HashMap<>();
 		response.put(message, getComment);
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 //	http://localhost:8080/blog/comment/update/{cid}
 	@PutMapping("/update/{cid}")
@@ -63,7 +63,7 @@ public class CommentController {
 		String message = "Message";
 		Map<String, String> response = new HashMap<>();
 		response.put(message, updateComment);
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 //	http://localhost:8080/blog/comment/delete/{cid}
 	@DeleteMapping("/delete/{cid}")
@@ -72,6 +72,6 @@ public class CommentController {
 		String message = "Message";
 		Map<String, String> response = new HashMap<>();
 		response.put(message, deleteComment);
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 }

@@ -47,7 +47,7 @@ public class Post {
 	@JsonIgnore
 	private List<Comment> comments = new ArrayList<>();;
 
-	@ManyToMany(mappedBy = "cat_posts")
+	@ManyToMany(mappedBy = "categoriesPosts")
 	private List<Category> categories = new ArrayList<>();
 
 }

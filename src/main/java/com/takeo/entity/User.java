@@ -11,6 +11,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -28,16 +29,16 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "uid")
 	private Long uId;
-	
-	@Column(name="name")
+
+	@Column(name = "name")
 	private String name;
-	
+
 	@Column(name = "email")
 	private String email;
-	
+
 	@Column(name = "mobile")
 	private String mobile;
-	
+
 	@Column(name = "password")
 	@JsonIgnore
 	private String password;
@@ -57,22 +58,22 @@ public class User {
 
 	@JsonIgnore
 	private String gender;
-	
+
 	@JsonIgnore
 	private String image;
-	
+
 	@JsonIgnore
 	private String otp;
-	
-	@JsonIgnore
-	private long roleId;
 
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JsonIgnore
 	private List<Post> posts = new ArrayList<>();
-	
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JsonIgnore
 	private List<Comment> comments = new ArrayList<>();
+
+	@ManyToMany(mappedBy = "rolesUsers")
+	private List<Role> roles = new ArrayList<>();
 
 }

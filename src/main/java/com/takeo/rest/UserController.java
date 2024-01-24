@@ -39,7 +39,7 @@ public class UserController {
 		String message = "Message";
 		Map<String, String> response = new HashMap<>();
 		response.put(message, userRegistration);
-		return new ResponseEntity<>(response, HttpStatus.OK);
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
 //	http://localhost:8080/blog/user/get

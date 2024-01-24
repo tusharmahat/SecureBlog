@@ -49,7 +49,7 @@ public class CategoryController {
 
 		response.put(message, category);
 
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 	// http://localhost:8080/blog/category/get/{id}
@@ -61,7 +61,7 @@ public class CategoryController {
 		Map<String, CategoryDto> response = new HashMap<>();
 		response.put(message, category);
 
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 	// http://localhost:8080/blog/category/update/{cid}
@@ -73,7 +73,7 @@ public class CategoryController {
 		String message = "Message";
 		Map<String, String> response = new HashMap<>();
 		response.put(message, existingCategory);
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 //	http://localhost:8080/blog/category/delete/{cid}
@@ -85,7 +85,7 @@ public class CategoryController {
 		Map<String, String> response = new HashMap<>();
 		response.put(message, deleteCategory);
 
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 
 	}
 
