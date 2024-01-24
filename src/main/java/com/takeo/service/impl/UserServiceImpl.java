@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -57,42 +55,7 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private ImageNameGenerator fileNameGenerator;
-
-	@PostConstruct
-	public void init() {
-		initializeDefaultUsers();
-	}
-
-	private void initializeDefaultUsers() {
-		createUserIfNotExists();
-	}
-
-	private void createUserIfNotExists() {
-		Optional<User> existingAdmin = daoImpl.findByEmail("silencenature123@gmail.com");
-		if (existingAdmin.isEmpty()) {
-			User newAdmin = new User();
-			newAdmin.setEmail("silencenature123@gmail.com");
-			newAdmin.setName("Tushar Mahat");
-			Role role = roleDaoImpl.findByRole("Admin").orElseThrow(
-					() -> new ResourceNotFoundException("Default roles initializer not working, roles not found"));
-			role.getRolesUsers().add(newAdmin);
-			// create a otp
-			String otp = OtpGenerator.generate();
-			try {
-				// Send OTP via email
-				emailService.sendMail(newAdmin.getEmail(), "OTP", "Your OTP is " + otp);
-				
-			} catch (Exception e) {
-				// Handle email sending failure (log or provide a user-friendly message)
-				System.out.println("Failed to send OTP. Please try again.");
-			}
-			// Save the OTP for the user
-			newAdmin.setOtp(otp);
-			newAdmin.getRoles().add(role);
-			daoImpl.save(newAdmin);
-		}
-	}
-
+  
 	@Override
 	public String register(UserDto userDto) {
 		Optional<User> existingUser = daoImpl.findByEmail(userDto.getEmail());

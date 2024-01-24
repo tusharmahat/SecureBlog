@@ -24,11 +24,8 @@ public class Category {
 	@Column(name = "catId")
 	private Long categoryId;
 
-	@Column(name = "cTitle")
-	private String categoryTitle;
-
-	@Column(name = "cDiscription")
-	private String CategoryDiscription;
+	@Column(name = "categoryName")
+	private String categoryName;
 
 	@ManyToMany
 	@JoinTable(

@@ -9,5 +9,5 @@ import com.takeo.entity.Category;
 
 @Repository
 public interface CategoryRepo extends JpaRepository<Category, Long> {
-	Optional<Category> findByCategoryTitle(String categoryTitle);
+	Optional<Category> findByCategoryName(String categoryName);
 }

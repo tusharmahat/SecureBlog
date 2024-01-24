@@ -10,33 +10,82 @@ import org.springframework.stereotype.Service;
 
 import com.takeo.dto.RoleDto;
 import com.takeo.entity.Role;
+import com.takeo.entity.User;
 import com.takeo.exceptions.DuplicateItemException;
 import com.takeo.exceptions.ResourceNotFoundException;
 import com.takeo.repo.RoleRepo;
+import com.takeo.repo.UserRepo;
 import com.takeo.service.RoleService;
+import com.takeo.utils.EmailService;
+import com.takeo.utils.OtpGenerator;
 
 @Service
 public class RoleServiceImpl implements RoleService {
 	@Autowired
 	private RoleRepo roleDaoImpl;
 
+	@Autowired
+	private UserRepo userRepo;
+
+	@Autowired
+	private EmailService emailService;
+
 	@PostConstruct
 	public void init() {
-		initializeDefaultRoles();
+	    initializeDefaultRoles();
+	    initializeAdminUser();
 	}
 
 	private void initializeDefaultRoles() {
-		createRoleIfNotExists("Admin");
-		createRoleIfNotExists("User");
+	    createRoleIfNotExists("Admin");
+	    createRoleIfNotExists("User");
+	}
+
+	private void initializeAdminUser() {
+	    if (!userRepo.findByEmail("silencenature123@gmail.com").isPresent()) {
+	        User adminUser = createNewAdminUser("admin", "silencenature123@gmail.com");
+
+	        try {
+	            // Send OTP via email
+	            sendOtp(adminUser);
+	        } catch (Exception e) {
+	            // Handle email sending failure (log or provide a user-friendly message)
+	            System.out.println("Failed to send OTP. Please try again.");
+	        }
+	    }
+	}
+
+	private User createNewAdminUser(String name, String email) {
+	    User adminUser = new User();
+	    adminUser.setName(name);
+	    adminUser.setEmail(email);
+
+	    Role adminRole = roleDaoImpl.findByRole("Admin").orElseThrow(
+	            () -> new ResourceNotFoundException("Default roles initializer not working, roles not found"));
+
+	    adminRole.getRolesUsers().add(adminUser);
+	    adminUser.getRoles().add(adminRole);
+
+	    // Save the role
+	    roleDaoImpl.save(adminRole);
+
+	    return adminUser;
 	}
 
 	private void createRoleIfNotExists(String roleName) {
-		Optional<Role> existingRole = roleDaoImpl.findByRole(roleName);
-		if (existingRole.isEmpty()) {
-			Role newRole = new Role();
-			newRole.setRole(roleName);
-			roleDaoImpl.save(newRole);
-		}
+	    Optional<Role> existingRole = roleDaoImpl.findByRole(roleName);
+	    if (existingRole.isEmpty()) {
+	        Role newRole = new Role();
+	        newRole.setRole(roleName);
+	        roleDaoImpl.save(newRole);
+	    }
+	}
+
+	private void sendOtp(User user) throws Exception {
+	    // Create and send OTP logic here
+	    String otp = OtpGenerator.generate();
+	    emailService.sendMail(user.getEmail(), "OTP", "Your OTP is " + otp);
+	    user.setOtp(otp);
 	}
 
 	@Override

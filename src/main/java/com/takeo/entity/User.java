@@ -73,7 +73,7 @@ public class User {
 	@JsonIgnore
 	private List<Comment> comments = new ArrayList<>();
 
-	@ManyToMany(mappedBy = "rolesUsers")
+	@ManyToMany(mappedBy = "rolesUsers", cascade = CascadeType.ALL)
 	private List<Role> roles = new ArrayList<>();
 
 }
