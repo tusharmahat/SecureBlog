@@ -33,6 +33,7 @@ import com.takeo.utils.ImageFile;
 import com.takeo.utils.ImageNameGenerator;
 import com.takeo.utils.OtpGenerator;
 import com.takeo.utils.PasswordGenerator;
+import com.takeo.utils.SmsService;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -44,6 +45,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private EmailService emailService;
+	
+	@Autowired
+	private SmsService smsService; 
 
 	@Autowired
 	private RoleRepo roleDaoImpl;
@@ -77,6 +81,7 @@ public class UserServiceImpl implements UserService {
 			try {
 				// Send OTP via email
 				emailService.sendMail(newAdmin.getEmail(), "OTP", "Your OTP is " + otp);
+				
 			} catch (Exception e) {
 				// Handle email sending failure (log or provide a user-friendly message)
 				System.out.println("Failed to send OTP. Please try again.");
@@ -102,6 +107,7 @@ public class UserServiceImpl implements UserService {
 			try {
 				// Send OTP via email
 				emailService.sendMail(userDto.getEmail(), "OTP", "Your OTP is " + otp);
+				smsService.sendSms(userDto.getMobile(), "Your OTP is " + otp);
 			} catch (Exception e) {
 				// Handle email sending failure (log or provide a user-friendly message)
 				return "Failed to send OTP. Please try again.";
@@ -122,7 +128,7 @@ public class UserServiceImpl implements UserService {
 			// Save the user
 			User saveUser = daoImpl.save(user);
 			if (saveUser != null) {
-				message = "OTP sent to the respective email address";
+				message = "OTP sent to the respective email address/Phone Number";
 			}
 		}
 		return message;
