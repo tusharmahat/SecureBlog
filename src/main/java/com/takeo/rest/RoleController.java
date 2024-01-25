@@ -27,7 +27,7 @@ public class RoleController {
 	@Autowired
 	private RoleService roleService;
 
-	@PostMapping("/create")
+	@PostMapping("/")
 	public ResponseEntity<Map<String, String>> createRole(@Valid @RequestBody RoleDto roleDto) {
 		String message = "Message";
 		String createRole = roleService.create(roleDto);
@@ -36,7 +36,7 @@ public class RoleController {
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 	
-	@GetMapping("/read/{rId}")
+	@GetMapping("/{rId}")
 	public ResponseEntity<Map<String, RoleDto>> getRole(@PathVariable("rId") Long rId) {
 		String message = "Role";
 		RoleDto role = roleService.getRole(rId);
@@ -45,7 +45,7 @@ public class RoleController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
-	@PutMapping("/update")
+	@PutMapping("/")
 	public ResponseEntity<Map<String, String>> updateRole(@Valid @RequestBody RoleDto roleDto,@RequestParam("rId") Long rId) {
 		String message = "Message";
 		String updateRole = roleService.updateRole(roleDto,rId);
@@ -54,7 +54,7 @@ public class RoleController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
-	@DeleteMapping("/delete")
+	@DeleteMapping("/")
 	public ResponseEntity<Map<String, String>> deleteRole(@PathVariable("rId") Long rId) {
 		String message = "Message";
 		String deleteRole = roleService.deleteRole(rId);

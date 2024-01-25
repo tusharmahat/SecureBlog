@@ -26,8 +26,7 @@ public class CategoryController {
 	@Autowired
 	private CategoryServiceImpl catServiceImpl;
 
-//	http://localhost:8080/blog/category/create
-	@PostMapping("/create")
+	@PostMapping("/")
 	public ResponseEntity<Map<String, String>> createCat(@RequestBody CategoryDto category) {
 		String message = "Message";
 		String catSave = catServiceImpl.create(category);
@@ -39,8 +38,7 @@ public class CategoryController {
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
-//	http://localhost:8080/blog/category/get
-	@GetMapping("/get")
+	@GetMapping("/")
 	public ResponseEntity<?> getAll() {
 		List<CategoryDto> category = catServiceImpl.readAll();
 		String message = "Categories";
@@ -52,8 +50,7 @@ public class CategoryController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	// http://localhost:8080/blog/category/get/{id}
-	@GetMapping("/get/{id}")
+	@GetMapping("/{id}")
 	public ResponseEntity<Map<String, CategoryDto>> get(@PathVariable("id") Long categoryId) {
 
 		CategoryDto category = catServiceImpl.readCategory(categoryId);
@@ -64,8 +61,7 @@ public class CategoryController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	// http://localhost:8080/blog/category/update/{cid}
-	@PutMapping("/update/{cid}")
+	@PutMapping("/{cid}")
 	public ResponseEntity<Map<String, String>> updateCategory(@PathVariable("cid") long categoryId,
 			@RequestBody CategoryDto category) {
 
@@ -76,8 +72,7 @@ public class CategoryController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-//	http://localhost:8080/blog/category/delete/{cid}
-	@DeleteMapping("/delete/{cid}")
+	@DeleteMapping("/{cid}")
 	public ResponseEntity<Map<String, String>> deleteCategory(@PathVariable("cid") long categoryId) {
 
 		String deleteCategory = catServiceImpl.delete(categoryId);

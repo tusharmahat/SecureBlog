@@ -32,7 +32,6 @@ public class UserController {
 	@Autowired
 	private UserServiceImpl userServiceImpl;
 
-//	http://localhost:8080/blog/user/register
 	@PostMapping("/register")
 	public ResponseEntity<Map<String, String>> register(@Valid @RequestBody UserDto userDto) {
 		String userRegistration = userServiceImpl.register(userDto);
@@ -42,16 +41,14 @@ public class UserController {
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
-//	http://localhost:8080/blog/user/get
-	@GetMapping("/get")
+	@GetMapping("/")
 	public ResponseEntity<List<UserDto>> getAll() {
 		List<UserDto> users = userServiceImpl.read();
 
 		return ResponseEntity.ok().body(users);
 	}
 
-//	http://localhost:8080/blog/user/update
-	@PutMapping("/update")
+	@PutMapping("/")
 	public ResponseEntity<Map<String, String>> putUser(@Valid @RequestBody UserDto userDto) {
 		String updateUser = userServiceImpl.update(userDto);
 		String message = "Message";
@@ -61,7 +58,6 @@ public class UserController {
 
 	}
 
-//	http://localhost:8080/blog/user/verify/{otp}
 	@PostMapping("/verify/{otp}")
 	public ResponseEntity<Map<String, String>> verifyOtp(@PathVariable("otp") String otp) {
 		String verifyOtp = userServiceImpl.verifyOtp(otp);
@@ -71,7 +67,6 @@ public class UserController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-//	http://localhost:8080/blog/user/login
 	@GetMapping("/login")
 	public ResponseEntity<Map<String, String>> login(@Valid @RequestBody LoginDto loginDto) {
 		String login = userServiceImpl.userLogin(loginDto.getEmail(), loginDto.getPassword());
@@ -81,7 +76,6 @@ public class UserController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-//	http://localhost:8080/blog/user/forgotpassword/{email}
 	@PostMapping("/forgotpassword/{email}")
 	public ResponseEntity<Map<String, String>> forgotPassword(@PathVariable String email) {
 		String resetPassword = userServiceImpl.forgotPassword(email);
@@ -91,7 +85,6 @@ public class UserController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-//	http://localhost:8080/blog/user/changepassword
 	@PostMapping("/changepassword")
 	public ResponseEntity<Map<String, String>> changePassword(@Valid @RequestBody ResetPasswordDto resetPassDto) {
 		String changePassword = userServiceImpl.changePassword(resetPassDto);
@@ -101,7 +94,6 @@ public class UserController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-//	http://localhost:8080/blog/user/updateprofilepic
 	@PostMapping("/updateprofilepic")
 	public ResponseEntity<Map<String, String>> updateProfilePic(@RequestParam("file") MultipartFile file,
 			@RequestParam("email") String email) {
@@ -112,7 +104,6 @@ public class UserController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-//	http://localhost:8080/blog/user/profilepic/{email}
 	@GetMapping("/profilepic/{email}")
 	public ResponseEntity<byte[]> getProfilePic(@PathVariable("email") String email) {
 		byte[] profilePic = userServiceImpl.viewProfilePicture(email);
