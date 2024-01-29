@@ -107,7 +107,7 @@ public class UserController {
 	@GetMapping("/profilepic/{email}")
 	public ResponseEntity<byte[]> getProfilePic(@PathVariable("email") String email) {
 		byte[] profilePic = userServiceImpl.viewProfilePicture(email);
-		return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.valueOf("image/png")).body(profilePic);
+		return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.IMAGE_JPEG).body(profilePic);
 	}
 
 }

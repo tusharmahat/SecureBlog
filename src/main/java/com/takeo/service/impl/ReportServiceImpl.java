@@ -28,8 +28,6 @@ import com.takeo.service.ReportService;
 
 @Service
 public class ReportServiceImpl implements ReportService {
-	final Font BLUE_BOLD = new Font(FontFamily.HELVETICA, 12, Font.BOLD, BaseColor.BLUE);
-	final Font BOLD = new Font(FontFamily.HELVETICA, 12, Font.BOLD, BaseColor.BLACK);
 	final Font RED_BOLD = new Font(FontFamily.HELVETICA, 12, Font.BOLD, BaseColor.RED);
 	final Font RED_NORMAL = new Font(FontFamily.HELVETICA, 12, Font.NORMAL, BaseColor.RED);
 	final String line = "-----------------------------------------------------------"

@@ -117,8 +117,8 @@ public class PostController {
 	
 	@GetMapping("/postpic/{pid}")
 	public ResponseEntity<byte[]> updatePostPic(@PathVariable("pid") Long pid) {
-		byte[] profilePic = postServiceImpl.viewPostPicture(pid);
-		return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.valueOf("image/png")).body(profilePic);
+		byte[] postPic = postServiceImpl.viewPostPicture(pid);
+		return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.IMAGE_JPEG).body(postPic);
 	}
 
 }
