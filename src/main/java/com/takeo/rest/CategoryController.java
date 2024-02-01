@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,15 +20,18 @@ import org.springframework.web.bind.annotation.RestController;
 import com.takeo.dto.CategoryDto;
 import com.takeo.service.impl.CategoryServiceImpl;
 
+import jakarta.validation.Valid;
+
 @RestController
-@RequestMapping("/blog/category")
+@RequestMapping("/category")
 public class CategoryController {
 
 	@Autowired
 	private CategoryServiceImpl catServiceImpl;
 
-	@PostMapping("/")
-	public ResponseEntity<Map<String, String>> createCat(@RequestBody CategoryDto category) {
+	@PreAuthorize("hasAuthority('ADMIN')")
+	@PostMapping("")
+	public ResponseEntity<Map<String, String>> createCat(@Valid @RequestBody CategoryDto category) {
 		String message = "Message";
 		String catSave = catServiceImpl.create(category);
 
@@ -38,7 +42,8 @@ public class CategoryController {
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
-	@GetMapping("/")
+	@PreAuthorize("hasAuthority('ADMIN')")
+	@GetMapping("")
 	public ResponseEntity<?> getAll() {
 		List<CategoryDto> category = catServiceImpl.readAll();
 		String message = "Categories";
@@ -50,6 +55,7 @@ public class CategoryController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
+	@PreAuthorize("hasAuthority('ADMIN')")
 	@GetMapping("/{id}")
 	public ResponseEntity<Map<String, CategoryDto>> get(@PathVariable("id") Long categoryId) {
 
@@ -61,9 +67,10 @@ public class CategoryController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
+	@PreAuthorize("hasAuthority('ADMIN')")
 	@PutMapping("/{cid}")
 	public ResponseEntity<Map<String, String>> updateCategory(@PathVariable("cid") long categoryId,
-			@RequestBody CategoryDto category) {
+			@Valid @RequestBody CategoryDto category) {
 
 		String existingCategory = catServiceImpl.update(category, categoryId);
 		String message = "Message";
@@ -72,6 +79,7 @@ public class CategoryController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
+	@PreAuthorize("hasAuthority('ADMIN')")
 	@DeleteMapping("/{cid}")
 	public ResponseEntity<Map<String, String>> deleteCategory(@PathVariable("cid") long categoryId) {
 
@@ -81,7 +89,6 @@ public class CategoryController {
 		response.put(message, deleteCategory);
 
 		return new ResponseEntity<>(response, HttpStatus.OK);
-
 	}
 
 }

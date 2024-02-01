@@ -12,6 +12,7 @@ import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 //import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,17 +40,18 @@ public class UserServiceImpl implements UserService {
 
 	private final String DB_PATH = "/Users/tusharmahat/db/";
 //	private final String DB_PATH ="C:\\Users\\himal\\OneDrive\\Desktop\\db\\";
-//	@Autowired
-//	SecurityConfig secConfig;
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	@Autowired
 	private UserRepo daoImpl;
 
 	@Autowired
 	private EmailService emailService;
-	
+
 	@Autowired
-	private SmsService smsService; 
+	private SmsService smsService;
 
 	@Autowired
 	private RoleRepo roleDaoImpl;
@@ -59,7 +61,7 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private ImageNameGenerator fileNameGenerator;
-  
+
 	@Override
 	public String register(UserDto userDto) {
 		Optional<User> existingUser = daoImpl.findByEmail(userDto.getEmail());
@@ -74,28 +76,31 @@ public class UserServiceImpl implements UserService {
 			try {
 				// Send OTP via email
 				emailService.sendMail(userDto.getEmail(), "OTP", "Your OTP is " + otp);
-				smsService.sendSms(userDto.getMobile(), "Your OTP is " + otp);
+				boolean smsSent = smsService.sendSms(userDto.getMobile(), "Your OTP is " + otp);
+				if (!smsSent) {
+					// Log the exception or provide a user-friendly message
+					System.out.println("Failed to send SMS. User creation will continue.");
+				}
+				User user = new User();
+				BeanUtils.copyProperties(userDto, user);
+
+				Role role = roleDaoImpl.findByRole("USER").orElseThrow(
+						() -> new ResourceNotFoundException("Default roles initializer not working, roles not found"));
+
+				role.getRolesUsers().add(user);
+				user.getRoles().add(role);
+
+				// Save the OTP for the user
+				user.setOtp(otp);
+
+				// Save the user
+				User saveUser = daoImpl.save(user);
+				if (saveUser != null) {
+					message = "OTP sent to the respective email address/Phone Number";
+				}
 			} catch (Exception e) {
 				// Handle email sending failure (log or provide a user-friendly message)
-				return "Failed to send OTP. Please try again.";
-			}
-
-			User user = new User();
-			BeanUtils.copyProperties(userDto, user);
-
-			Role role = roleDaoImpl.findByRole("User").orElseThrow(
-					() -> new ResourceNotFoundException("Default roles initializer not working, roles not found"));
-
-			role.getRolesUsers().add(user);
-			user.getRoles().add(role);
-
-			// Save the OTP for the user
-			user.setOtp(otp);
-
-			// Save the user
-			User saveUser = daoImpl.save(user);
-			if (saveUser != null) {
-				message = "OTP sent to the respective email address/Phone Number";
+				return "Failed to send OTP in email. Please try again.";
 			}
 		}
 		return message;
@@ -139,7 +144,7 @@ public class UserServiceImpl implements UserService {
 
 		if (otp.equals(existingUser.getOtp())) {
 			String randomPassword = PasswordGenerator.generateRandomPassword();
-			existingUser.setPassword((randomPassword));
+			existingUser.setPassword(passwordEncoder.encode(randomPassword));
 			existingUser.setOtp("");
 			User saveUser = daoImpl.save(existingUser);
 			if (saveUser != null) {
@@ -151,11 +156,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public String userLogin(String email, String password) {
-		User existingUser = daoImpl.findByEmail(email)
-				.orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+	public String userLogin(String username, String password) {
+		User existingUser = daoImpl.findByUsername(username)
+				.orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
 		if (existingUser.getPassword() != null) {
-			if (existingUser.getPassword().equals(password)) {
+			if (passwordEncoder.matches(password, existingUser.getPassword())) {
 				return "Logged in";
 			} else {
 				throw new PasswordMismatchException("Password did not match");
@@ -165,13 +170,14 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public String forgotPassword(String email) {
-		User user = daoImpl.findByEmail(email)
-				.orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+	public String forgotPassword(String username) {
+		User user = daoImpl.findByUsername(username)
+				.orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
+
 		String message = "Failed to change password";
 
 		String randomPassword = PasswordGenerator.generateRandomPassword();
-		user.setPassword(randomPassword);
+		user.setPassword(passwordEncoder.encode(randomPassword));
 		User saveUser = daoImpl.save(user);
 		if (saveUser != null) {
 			emailService.sendMail(user.getEmail(), "Password", "Your password is " + randomPassword);
@@ -231,7 +237,7 @@ public class UserServiceImpl implements UserService {
 				() -> new ResourceNotFoundException("User not found with email: " + resetPassDto.getEmail()));
 		if (resetPassDto.getPassword().equals(resetPassDto.getConfirmPassword())) {
 
-			user.setPassword(resetPassDto.getConfirmPassword());
+			user.setPassword(passwordEncoder.encode(resetPassDto.getConfirmPassword()));
 
 			User saveUser = daoImpl.save(user);
 			if (saveUser != null) {

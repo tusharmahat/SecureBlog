@@ -4,12 +4,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,13 +26,16 @@ import com.takeo.dto.ResetPasswordDto;
 import com.takeo.dto.UserDto;
 import com.takeo.service.impl.UserServiceImpl;
 
+import jakarta.validation.Valid;
+
 @RestController
-@RequestMapping("/blog/user")
+@RequestMapping("/user")
 public class UserController {
 
 	@Autowired
 	private UserServiceImpl userServiceImpl;
 
+	@PreAuthorize("permitAll()")
 	@PostMapping("/register")
 	public ResponseEntity<Map<String, String>> register(@Valid @RequestBody UserDto userDto) {
 		String userRegistration = userServiceImpl.register(userDto);
@@ -41,15 +45,19 @@ public class UserController {
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
-	@GetMapping("/")
+	@PreAuthorize("hasAuthority('ADMIN')")
+	@GetMapping("")
 	public ResponseEntity<List<UserDto>> getAll() {
-		List<UserDto> users = userServiceImpl.read();
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		System.out.println("Authorities: " + authentication.getAuthorities());
 
+		List<UserDto> users = userServiceImpl.read();
 		return ResponseEntity.ok().body(users);
 	}
 
-	@PutMapping("/")
-	public ResponseEntity<Map<String, String>> putUser(@Valid @RequestBody UserDto userDto) {
+	@PreAuthorize("hasAnyAuthority('ADMIN','USER') and #username == authentication.principal.username")
+	@PutMapping("/{username}")
+	public ResponseEntity<Map<String, String>> putUser(@PathVariable("username") String username,@Valid @RequestBody UserDto userDto) {
 		String updateUser = userServiceImpl.update(userDto);
 		String message = "Message";
 		Map<String, String> response = new HashMap<>();
@@ -58,6 +66,7 @@ public class UserController {
 
 	}
 
+	@PreAuthorize("permitAll()")
 	@PostMapping("/verify/{otp}")
 	public ResponseEntity<Map<String, String>> verifyOtp(@PathVariable("otp") String otp) {
 		String verifyOtp = userServiceImpl.verifyOtp(otp);
@@ -67,15 +76,17 @@ public class UserController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
+	@PreAuthorize("permitAll()")
 	@GetMapping("/login")
 	public ResponseEntity<Map<String, String>> login(@Valid @RequestBody LoginDto loginDto) {
-		String login = userServiceImpl.userLogin(loginDto.getEmail(), loginDto.getPassword());
+		String login = userServiceImpl.userLogin(loginDto.getUsername(), loginDto.getPassword());
 		String message = "Message";
 		Map<String, String> response = new HashMap<>();
 		response.put(message, login);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
+	@PreAuthorize("permitAll()")
 	@PostMapping("/forgotpassword/{email}")
 	public ResponseEntity<Map<String, String>> forgotPassword(@PathVariable String email) {
 		String resetPassword = userServiceImpl.forgotPassword(email);
@@ -85,8 +96,9 @@ public class UserController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	@PostMapping("/changepassword")
-	public ResponseEntity<Map<String, String>> changePassword(@Valid @RequestBody ResetPasswordDto resetPassDto) {
+	@PreAuthorize("hasAnyAuthority('ADMIN','USER') and #username == authentication.principal.username")
+	@PutMapping("/password/{username}")
+	public ResponseEntity<Map<String, String>> changePassword(@PathVariable("username") String username,@Valid @RequestBody ResetPasswordDto resetPassDto) {
 		String changePassword = userServiceImpl.changePassword(resetPassDto);
 		String message = "Message";
 		Map<String, String> response = new HashMap<>();
@@ -94,19 +106,21 @@ public class UserController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	@PostMapping("/updateprofilepic")
+	@PreAuthorize("hasAnyAuthority('ADMIN','USER') and #username == authentication.principal.username")
+	@PutMapping("/pic/{username}")
 	public ResponseEntity<Map<String, String>> updateProfilePic(@RequestParam("file") MultipartFile file,
-			@RequestParam("email") String email) {
-		String updatePicture = userServiceImpl.updateProfilePicture(file, email);
+			@PathVariable("username") String username) {
+		String updatePicture = userServiceImpl.updateProfilePicture(file, username);
 		String message = "Message";
 		Map<String, String> response = new HashMap<>();
 		response.put(message, updatePicture);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	@GetMapping("/profilepic/{email}")
-	public ResponseEntity<byte[]> getProfilePic(@PathVariable("email") String email) {
-		byte[] profilePic = userServiceImpl.viewProfilePicture(email);
+	@PreAuthorize("hasAnyAuthority('ADMIN','USER') and #username == authentication.principal.username")
+	@GetMapping("/pic/{username}")
+	public ResponseEntity<byte[]> getProfilePic(@PathVariable("username") String username) {
+		byte[] profilePic = userServiceImpl.viewProfilePicture(username);
 		return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.IMAGE_JPEG).body(profilePic);
 	}
 

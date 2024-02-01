@@ -2,8 +2,6 @@ package com.takeo.service.impl;
 
 import java.util.Optional;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +17,8 @@ import com.takeo.service.RoleService;
 import com.takeo.utils.EmailService;
 import com.takeo.utils.OtpGenerator;
 
+import jakarta.annotation.PostConstruct;
+
 @Service
 public class RoleServiceImpl implements RoleService {
 	@Autowired
@@ -32,60 +32,58 @@ public class RoleServiceImpl implements RoleService {
 
 	@PostConstruct
 	public void init() {
-	    initializeDefaultRoles();
-	    initializeAdminUser();
+		initializeDefaultRoles();
+		initializeAdminUser();
 	}
 
 	private void initializeDefaultRoles() {
-	    createRoleIfNotExists("Admin");
-	    createRoleIfNotExists("User");
+		createRoleIfNotExists("ADMIN");
+		createRoleIfNotExists("USER");
 	}
 
 	private void initializeAdminUser() {
-	    if (!userRepo.findByEmail("silencenature123@gmail.com").isPresent()) {
-	        User adminUser = createNewAdminUser("admin", "silencenature123@gmail.com");
+		if (!userRepo.findByEmail("silencenature123@gmail.com").isPresent()) {
 
-	        try {
-	            // Send OTP via email
-	            sendOtp(adminUser);
-	        } catch (Exception e) {
-	            // Handle email sending failure (log or provide a user-friendly message)
-	            System.out.println("Failed to send OTP. Please try again.");
-	        }
-	    }
+			try {
+				createNewAdminUser("ADMIN", "silencenature123@gmail.com");
+			} catch (Exception e) {
+				// Handle email sending failure (log or provide a user-friendly message)
+				System.out.println("Failed to send OTP. Please try again.");
+			}
+		}
 	}
 
-	private User createNewAdminUser(String name, String email) {
-	    User adminUser = new User();
-	    adminUser.setName(name);
-	    adminUser.setEmail(email);
+	private User createNewAdminUser(String name, String email) throws Exception {
+		User adminUser = new User();
+		adminUser.setName(name);
+		adminUser.setEmail(email);
+		adminUser.setUsername(email);
+		Role adminRole = roleDaoImpl.findByRole("ADMIN").orElseThrow(
+				() -> new ResourceNotFoundException("Default roles initializer not working, roles not found"));
 
-	    Role adminRole = roleDaoImpl.findByRole("Admin").orElseThrow(
-	            () -> new ResourceNotFoundException("Default roles initializer not working, roles not found"));
+		adminRole.getRolesUsers().add(adminUser);
+		adminUser.getRoles().add(adminRole);
+		sendOtp(adminUser);
+		// Save the role
+		roleDaoImpl.save(adminRole);
 
-	    adminRole.getRolesUsers().add(adminUser);
-	    adminUser.getRoles().add(adminRole);
-
-	    // Save the role
-	    roleDaoImpl.save(adminRole);
-
-	    return adminUser;
+		return adminUser;
 	}
 
 	private void createRoleIfNotExists(String roleName) {
-	    Optional<Role> existingRole = roleDaoImpl.findByRole(roleName);
-	    if (existingRole.isEmpty()) {
-	        Role newRole = new Role();
-	        newRole.setRole(roleName);
-	        roleDaoImpl.save(newRole);
-	    }
+		Optional<Role> existingRole = roleDaoImpl.findByRole(roleName);
+		if (existingRole.isEmpty()) {
+			Role newRole = new Role();
+			newRole.setRole(roleName);
+			roleDaoImpl.save(newRole);
+		}
 	}
 
 	private void sendOtp(User user) throws Exception {
-	    // Create and send OTP logic here
-	    String otp = OtpGenerator.generate();
-	    emailService.sendMail(user.getEmail(), "OTP", "Your OTP is " + otp);
-	    user.setOtp(otp);
+		// Create and send OTP logic here
+		String otp = OtpGenerator.generate();
+		emailService.sendMail(user.getEmail(), "OTP", "Your OTP is " + otp);
+		user.setOtp(otp);
 	}
 
 	@Override

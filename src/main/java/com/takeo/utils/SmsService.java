@@ -20,17 +20,18 @@ public class SmsService {
 	@Value("${twilio.phoneNumber}")
 	private String phoneNumber;
 
-	public String sendSms(String to, String otp1) {
+	public boolean sendSms(String to, String otp1) {
 		Twilio.init(accountSid, authToken);
 
 		// Send OTP via SMS
 
 		String message = "Your OTP number is: " + otp1;
-
-		Message.creator(new PhoneNumber(to), new PhoneNumber(phoneNumber),message).create();
-
-
-		return "Send Sucessfully";
+		try {
+			Message.creator(new PhoneNumber(to), new PhoneNumber(phoneNumber), message).create();
+		} catch (Exception e) {
+			return false;
+		}
+		return true;
 
 	}
 
