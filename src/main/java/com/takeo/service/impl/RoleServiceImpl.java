@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.takeo.dto.RoleDto;
@@ -29,6 +30,9 @@ public class RoleServiceImpl implements RoleService {
 
 	@Autowired
 	private EmailService emailService;
+	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	@PostConstruct
 	public void init() {
@@ -42,10 +46,10 @@ public class RoleServiceImpl implements RoleService {
 	}
 
 	private void initializeAdminUser() {
-		if (!userRepo.findByEmail("silencenature123@gmail.com").isPresent()) {
+		if (!userRepo.findByEmail("email@gmail.com").isPresent()) {
 
 			try {
-				createNewAdminUser("ADMIN", "silencenature123@gmail.com");
+				createNewAdminUser("ADMIN", "email@gmail.com");
 			} catch (Exception e) {
 				// Handle email sending failure (log or provide a user-friendly message)
 				System.out.println("Failed to send OTP. Please try again.");
@@ -58,12 +62,13 @@ public class RoleServiceImpl implements RoleService {
 		adminUser.setName(name);
 		adminUser.setEmail(email);
 		adminUser.setUsername(email);
+
+		adminUser.setPassword(passwordEncoder.encode("12345"));
 		Role adminRole = roleDaoImpl.findByRole("ADMIN").orElseThrow(
 				() -> new ResourceNotFoundException("Default roles initializer not working, roles not found"));
 
 		adminRole.getRolesUsers().add(adminUser);
 		adminUser.getRoles().add(adminRole);
-		sendOtp(adminUser);
 		// Save the role
 		roleDaoImpl.save(adminRole);
 

@@ -42,7 +42,6 @@ public class User {
 	private String mobile;
 
 	@Column(name = "password")
-	@JsonIgnore
 	private String password;
 
 	@JsonIgnore
