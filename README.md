@@ -34,13 +34,13 @@ This repository contains the source code for a comprehensive blog management app
 1. Clone the repository:
 
    ```
-   git clone https://github.com/your-username/spring-boot-blog-management.git
+   git clone https://github.com/tusharmahat/SpringBoot_Blog_RestAPI.git
    ```
 
 2. Navigate to the project directory:
 
    ```
-   cd spring-boot-blog-management
+   cd SpringBoot_Blog_RestAPI
    ```
 
 3. Build and run the application:
