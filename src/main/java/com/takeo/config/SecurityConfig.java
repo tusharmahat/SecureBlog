@@ -34,7 +34,7 @@ public class SecurityConfig {
 		return http.csrf().disable().authorizeHttpRequests()
 				.requestMatchers("/user/register", "/user/verify/**", "/user/login", "/user/forgotpassword/**", "/post")
 				.permitAll().requestMatchers(HttpMethod.GET, "/post/**", "/comment/**").permitAll()
-				.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
+				.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()//TODO: change to admin only
 
 				.requestMatchers("/report/**", "/role/**", "/category/**").hasAuthority("ADMIN")
 				.requestMatchers(HttpMethod.GET, "/user").hasAuthority("ADMIN")

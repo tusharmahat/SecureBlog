@@ -8,6 +8,7 @@ class SbRestBlogMangementApplicationTests {
 
 	@Test
 	void contextLoads() {
+		
 	}
 
 }
