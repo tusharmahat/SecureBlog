@@ -42,18 +42,20 @@ This repository contains the source code for a comprehensive blog management app
    ```
    cd SpringBoot_Blog_RestAPI
    ```
+3. Make sure you have mysql installed, and create a schema "BlogRestAPI"
 
-3. Build and run the application:
+4. Build and run the application:
 
    ```
    mvn spring-boot:run
    ```
 
-4. Access the application at `http://localhost:8080`.
+4. Access the application at `http://localhost:8080`, which shows nothing, go to API Documentation to explore endpoints.
+Login using email: email@gmail.com password: 12345
 
 ## Documentation
 
-- [API Documentation](http://localhost:8080/swagger-ui.html) - Swagger UI for exploring and testing the API endpoints.
+- [API Documentation](http://localhost:8080/swagger-ui/index.html#/) - Swagger UI for exploring and testing the API endpoints.
 
 ## Contributing
 
