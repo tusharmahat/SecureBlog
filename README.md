@@ -1,4 +1,3 @@
-```markdown
 # Spring Boot Blog Management Application
 
 This repository contains the source code for a comprehensive blog management application developed using the Spring Boot framework. The application follows a monolithic architecture and incorporates various features and technologies to enable efficient management of blogs and user interactions.
@@ -61,7 +60,3 @@ Login using email: email@gmail.com password: 12345
 
 Contributions are welcome! Please feel free to submit a pull request or open an issue for any feature requests, bug fixes, or improvements.
 
-## License
-
-This project is licensed under the [MIT License](LICENSE).
-```
