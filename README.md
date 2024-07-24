@@ -44,12 +44,12 @@ This repository contains the source code for a comprehensive blog management app
 3. Make sure you have mysql installed, and create a schema "BlogRestAPI"
 
 4. Build and run the application:
-   JDK and Maven must be installed
+   JDK 17, Maven 3.9.6 and MySQL 8.0.35 must be installed
    ```
    mvn spring-boot:run
    ```
 
-4. Access the application at `http://localhost:8080`, which shows nothing, go to API Documentation to explore endpoints.
+4. Access the application at `http://localhost:8080/swagger-ui/index.html#/`
 Login using email: email@gmail.com password: 12345
 
 ## Documentation
