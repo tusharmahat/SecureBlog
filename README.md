@@ -44,7 +44,7 @@ This repository contains the source code for a comprehensive blog management app
 3. Make sure you have mysql installed, and create a schema "BlogRestAPI"
 
 4. Build and run the application:
-
+   JDK and Maven must be installed
    ```
    mvn spring-boot:run
    ```
