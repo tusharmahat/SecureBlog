@@ -1,5 +1,5 @@
 # Spring Boot Blog Management Application
-
+<img src="Secure-blogs.gif" alt="SecureBlogs GIF" width="600" height="800">
 This repository contains the source code for a comprehensive blog management application developed using the Spring Boot framework. The application follows a monolithic architecture and incorporates various features and technologies to enable efficient management of blogs and user interactions.
 
 ## Features
