@@ -49,7 +49,14 @@ This repository contains the source code for a comprehensive blog management app
    mvn spring-boot:run
    ```
 
-4. Access the application at `http://localhost:8080`, which shows nothing, go to API Documentation to explore endpoints.
+   OR
+
+    ```
+   docker-compose build
+   docker-compose up
+   ```
+
+6. Access the application at `http://localhost:8080`, which shows nothing, go to API Documentation to explore endpoints.
 Login using email: email@gmail.com password: 12345
 
 ## Documentation
